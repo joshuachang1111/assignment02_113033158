@@ -1,0 +1,8 @@
+{
+  "engine": "cocos-creator-js",
+  "packages": "packages",
+  "name": "MarioGame",
+  "id": "bdca4d5b-66b6-4e94-b53b-02b0b55bd869",
+  "version": "2.4.8",
+  "isNew": false
+}

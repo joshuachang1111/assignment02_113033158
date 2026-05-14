@@ -1,0 +1,19 @@
+# Cocos Creator 自動產生的快取，不需要上傳
+MarioGame/library/
+MarioGame/local/
+MarioGame/temp/
+MarioGame/build/
+
+# 依賴套件
+node_modules/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Firebase build output
+public/
+
+# 編輯器設定
+.vscode/
+*.swp
