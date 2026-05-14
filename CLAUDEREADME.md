@@ -221,8 +221,8 @@ DEAD + lives == 0 ──→ GameOver
 |------|------|------|
 | 1 | 專案建立 + 素材匯入 + Tiled 安裝與設定 | ✅ 完成 |
 | 2 | TiledMap Level 1 設計 + 物理碰撞設定 + Camera | ✅ 完成 |
-| 3 | Player 控制 + 狀態機 + Camera 跟隨 | 下一個 |
-| 4 | Goomba 敵人 + 頭踩判定 | |
+| 3 | Player 控制 + 狀態機 + Camera 跟隨 | ✅ 完成 |
+| 4 | Goomba 敵人 + 頭踩判定 | 下一個 |
 | 5 | QuestionBlock + Mushroom 道具系統 | |
 | 6 | 傷害/死亡/重生 + GameManager 全域狀態 | |
 | 7 | UI（HUD + 所有選單場景）| |

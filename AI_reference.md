@@ -43,6 +43,33 @@ Claude 產出：
   座標轉換：Tiled row 0=頂部，CC Y 朝上，localY = (numRows-1-row)*tileH + tileH/2。
   CameraFollow 在 start() 根據 mapNode.x 動態計算左右邊界，不寫死數值。
 
+--- 互動 4 ---
+使用者 prompt：階段 3 — Player 控制、狀態機、動畫切換
+               （確認方案：contact-count 地面偵測、直接設 linearVelocity、
+                 跳躍速度 700、重力 -960、6 動畫狀態、Player node scale 3）
+Claude 產出：
+- 新增 assets/scripts/player/PlayerState.ts
+  （PlayerState enum: SMALL / BIG / DEAD）
+- 新增 assets/scripts/player/Player.ts
+  （鍵盤輸入 ←/→/Space/↑/WASD、直接設 rb.linearVelocity 水平速度、
+   jumpJustPressed 單次跳躍防重複、contact-count isGrounded（含 vy<50 天花板過濾）、
+   takeDamage/die/respawn/growBig 公開 API、無敵閃爍效果、
+   die 時 sensor=true 使角色穿過地板做死亡飛弧動畫）
+- 新增 assets/scripts/player/PlayerAnim.ts
+  （掛在 Visual 子節點，透過 node.parent 取得 Player/RigidBody；
+   smallAtlas / bigAtlas 兩個 SpriteAtlas 屬性；
+   Timer-based frame stepping 10fps；
+   node.scaleX=±1 水平翻轉（不影響父節點物理碰撞體））
+
+修改說明：
+  Visual 子節點架構：Player root 掛 RigidBody+PhysicsBoxCollider+Player.ts，
+  子節點 Visual 掛 cc.Sprite+PlayerAnim.ts，翻轉只改子節點 scaleX，
+  保持父節點 scaleX 為正值，Box2D 不受影響。
+  Collider size: SMALL=(14,16) offset=(0,8)、BIG=(14,26) offset=(0,13)，
+  以 anchor(0.5,0) 使碰撞體底部對齊節點位置（地板面）。
+  Frame 分組（初版，可依實際 sprite 調整）：
+    idle=[0], walk=[1,2,3], air=[5], dead=[6]。
+
 --- 互動 1 ---
 使用者 prompt：閱讀作業簡報，確認規格與技術限制，規劃專案架構
                （Cocos Creator 版本、配分、目錄結構、實作順序）
