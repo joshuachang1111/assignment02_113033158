@@ -222,8 +222,8 @@ DEAD + lives == 0 ──→ GameOver
 | 1 | 專案建立 + 素材匯入 + Tiled 安裝與設定 | ✅ 完成 |
 | 2 | TiledMap Level 1 設計 + 物理碰撞設定 + Camera | ✅ 完成 |
 | 3 | Player 控制 + 狀態機 + Camera 跟隨 | ✅ 完成 |
-| 4 | Goomba 敵人 + 頭踩判定 | 下一個 |
-| 5 | QuestionBlock + Mushroom 道具系統 | |
+| 4 | Goomba 敵人 + 頭踩判定 | ✅ 完成 |
+| 5 | QuestionBlock + Mushroom 道具系統 | 下一個 |
 | 6 | 傷害/死亡/重生 + GameManager 全域狀態 | |
 | 7 | UI（HUD + 所有選單場景）| |
 | 8 | 動畫（Sprite Animation）+ 音效 | |
@@ -236,7 +236,7 @@ DEAD + lives == 0 ──→ GameOver
 
 ## 已知問題 / 注意事項
 
-- **TMX 版本**：每次用 Tiled 重新儲存 level1.tmx，會自動被蓋回 `version="1.10"`。commit 前務必執行：
+- **TMX 版本**：每次用 Tiled 重新儲存 level1.tmx，會自動被蓋回 `version="1.10"`。pre-commit hook 會自動修正，手動執行：
   ```bash
   sed -i '' 's/version="1\.10" tiledversion="1\.12\.1"/version="1.2"/' \
     MarioGame/assets/resources/tilemaps/level1.tmx \

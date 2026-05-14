@@ -211,4 +211,10 @@ export default class Player extends cc.Component {
         this.playerState = PlayerState.BIG;
         this.applyColliderSize();
     }
+
+    // Called by enemies when player stomps them — small upward bounce
+    stomp() {
+        this.jumpLockout = 0.1;
+        this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, 400);
+    }
 }

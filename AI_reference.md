@@ -115,4 +115,51 @@ Claude 產出：
   以上為純規劃討論與文件建立，尚未撰寫任何遊戲程式碼。
   所有架構決策已記錄於 CLAUDEREADME.md 供後續對話參考。
 
+--- 互動 6 ---
+使用者 prompt：階段 4 — Goomba 敵人實作，修正碰牆不轉向與玩家互動無效問題
+Claude 產出：
+- 修改 assets/scripts/enemies/EnemyBase.ts
+  （① 新增 mapLeftBoundary 屬性作左邊界反轉保護；
+   ② 新增 velocity-stuck 偵測：若 |vx| < 5 則反轉 direction，替代不穩定的 contact callback；
+   ③ onBeginContact 以 worldManifold.normal.x > 0.7 偵測牆壁，保留作輔助）
+- 修改 assets/scripts/enemies/Goomba.ts
+  （① 在 start() 以 cc.find('Canvas/World/Player') + fallback scene search 快取 Player 參照；
+   ② 移除 onBeginContact 玩家偵測，改為 update() 每幀 AABB overlap 檢查；
+   ③ 加入 hitCooldown 防止在無敵期間重複傷害；
+   ④ 踩頭判定：playerVy < -50 && playerBottom > goombaCenter.y；
+   ⑤ 走路動畫保留：Goomba_0/Goomba_1 @ 0.2s，死亡顯示 Goomba_2 後 0.4s destroy）
+
+修改說明：
+  CC2.4.8 的 Box2D contact callback 在 Dynamic-Dynamic 碰撞時不穩定，
+  導致 Goomba 與 Player 的 onBeginContact 常常不觸發。
+  解法：完全放棄在 contact callback 裡做玩家互動，改為在 update() 每幀
+  手動計算兩個碰撞體的 AABB 是否重疊（以世界座標計算半寬/半高之和比較）。
+  Goomba AABB：寬 54（18px×scale3）、高 66（22px×scale3），anchor(0.5,0)。
+  Player AABB：寬 42（14px×scale3）、高 48（16px×scale3），anchor(0.5,0)。
+  overlapX threshold=48，overlapY threshold=57。
+
+--- 互動 7 ---
+使用者 prompt：修正 Goomba 無左邊界 + 側碰有時不觸發的問題
+Claude 產出：
+- 修改 assets/scripts/world/LevelLoader.ts
+  （新增 spawnBoundaryWalls()：地圖左右各生成一個 Static RigidBody + PhysicsBoxCollider 牆，
+   寬 1 tile、高地圖高度 ×2，物理直接擋住 Mario 與 Goomba）
+- 修改 assets/scripts/enemies/Goomba.ts
+  （AABB 判斷加 8px 緩衝：`dx > OVERLAP_X + 8` 取代原本 `dx >= OVERLAP_X`，
+   避免 Box2D 把兩個 Dynamic 碰撞體解算到恰好接觸時被 >= 條件略過）
+- 修改 assets/scripts/enemies/EnemyBase.ts
+  （reverseCooldown 初始值從 0 改為 0.15，跳過第 1 幀 vx=0 觸發 stuck-detection
+   的問題，修正 Goomba 一開始就往右走的 bug）
+- 修改 assets/scripts/enemies/Goomba.ts
+  （踩頭判定 threshold 從 myCenter.y 改為 myPos.y+50（75% 高），
+   防止玩家在跳躍側面中段被誤判成踩頭後什麼都不觸發）
+- 修正 resources/tilemaps/level1.tmx（版本再次從 1.10 修回 1.2）
+
+修改說明：
+  左右物理牆加在 LevelLoader，為 Map 節點的子節點（Map scale=3，
+  所以碰撞體 local size 16×(23+8)*16=496 → world 48×1488）。
+  AABB +8px 緩衝解決 Box2D 解算後恰好 dx==threshold 被略過的問題。
+  reverseCooldown=0.15 初始值解決第 1 幀 vx=0 觸發方向翻轉的問題。
+  TMX version 每次用 Tiled 1.12.1 儲存就會被蓋成 1.10，已有 pre-commit hook 自動修正。
+
 ---
