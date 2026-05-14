@@ -6,19 +6,27 @@ const { ccclass, property } = cc._decorator;
 // Internal animation state (independent of PlayerState)
 enum AnimState { IDLE, WALK, AIR, DEAD }
 
-// Frame name arrays — adjust indices here after inspecting the sprite sheets in-game
+// Frame layout for mario_small.png (11 cols × 3 rows, 16×16 each):
+//   Row 0 (y=1)  right-facing: col0=back-view(skip), col1=11, col2=15, col3=18,
+//                               col4=22, col5=25, col6=28, col7=30, col8=33, col9=4, col10=7
+//   Row 1 (y=19) left-facing:  col0=1,  col1=13, col2=16, col3=19,
+//                               col4=23, col5=26, col6=29, col7=31, col8=34, col9=5, col10=9
+//   Row 2 (y=37) misc/special: col9=6 (death spin), etc.
+//
+// mario_small_0 is the pipe-entry back-view frame — do NOT use for idle/walk.
+// Adjust any index here if the in-game sprite looks wrong.
 const FRAMES = {
     small: {
-        [AnimState.IDLE]: ['mario_small_0'],
-        [AnimState.WALK]: ['mario_small_1', 'mario_small_2', 'mario_small_3'],
-        [AnimState.AIR]:  ['mario_small_5'],
+        [AnimState.IDLE]: ['mario_small_11'],
+        [AnimState.WALK]: ['mario_small_11', 'mario_small_15', 'mario_small_18'],
+        [AnimState.AIR]:  ['mario_small_22'],
         [AnimState.DEAD]: ['mario_small_6'],
     },
     big: {
-        [AnimState.IDLE]: ['mario_big_0'],
-        [AnimState.WALK]: ['mario_big_1', 'mario_big_2', 'mario_big_3'],
-        [AnimState.AIR]:  ['mario_big_5'],
-        [AnimState.DEAD]: ['mario_big_0'],  // big mario degrades to small before dying
+        [AnimState.IDLE]: ['mario_big_20'],
+        [AnimState.WALK]: ['mario_big_20', 'mario_big_21', 'mario_big_22'],
+        [AnimState.AIR]:  ['mario_big_27'],
+        [AnimState.DEAD]: ['mario_big_20'],
     },
 };
 
@@ -79,7 +87,9 @@ export default class PlayerAnim extends cc.Component {
         const isBig  = this.player.playerState === PlayerState.BIG;
         const atlas  = isBig ? this.bigAtlas : this.smallAtlas;
         if (!atlas) return;
-        const frame = atlas.getSpriteFrame(frames[this.frameIndex]);
+        const name  = frames[this.frameIndex];
+        // CC2.4.8 may store frame names with or without .png suffix
+        const frame = atlas.getSpriteFrame(name) || atlas.getSpriteFrame(name + '.png');
         if (frame) this.sprite.spriteFrame = frame;
     }
 

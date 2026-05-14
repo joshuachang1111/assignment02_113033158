@@ -13,22 +13,24 @@ export default class CameraFollow extends cc.Component {
     @property
     mapWorldWidth: number = 9600;
 
+    // 鏡頭向右偏移量（正值 → Mario 偏左顯示）。預設 150，可在 Editor 調整。
+    @property
+    lookaheadX: number = 150;
+
     private minX: number = 0;
     private maxX: number = 0;
 
     start() {
-        const halfW   = cc.winSize.width / 2;          // 640
+        const halfW   = cc.winSize.width / 2;
         const mapLeft = this.mapNode ? this.mapNode.x : -halfW;
-        this.minX = mapLeft + halfW;                    // 左邊界：地圖左 + 半螢幕
-        this.maxX = mapLeft + this.mapWorldWidth - halfW; // 右邊界：地圖右 - 半螢幕
+        this.minX = mapLeft + halfW;
+        this.maxX = mapLeft + this.mapWorldWidth - halfW;
     }
 
     update() {
         if (!this.playerNode) return;
 
-        // 取玩家在世界空間（Canvas 座標）的 X
         const wx = this.playerNode.convertToWorldSpaceAR(cc.Vec2.ZERO).x;
-        this.node.x = cc.misc.clampf(wx, this.minX, this.maxX);
-        // Y 軸固定，不跟隨上下
+        this.node.x = cc.misc.clampf(wx + this.lookaheadX, this.minX, this.maxX);
     }
 }

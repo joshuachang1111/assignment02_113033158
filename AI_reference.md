@@ -12,6 +12,20 @@
 
 ## 互動紀錄
 
+--- 互動 1 ---
+使用者 prompt：閱讀作業簡報，確認規格與技術限制，規劃專案架構
+               （Cocos Creator 版本、配分、目錄結構、實作順序）
+Claude 產出：
+- 分析 2026(Spring)_SS-Assignment_02_Web Mario.pptx 完整內容
+- 確認無 Cocos Creator 版本限制，決定使用 2.4.8
+- 規劃完整目錄結構（managers / player / enemies / items / world / ui）
+- 規劃 Firebase Firestore 資料結構（users、leaderboard collection）
+- 規劃玩家狀態機（SMALL / BIG / DEAD）
+- 規劃碰撞分層（player / enemy / ground / item / block）
+- 建立 CLAUDEREADME.md（專案記憶檔）
+- 建立 README.md（作業繳交用說明文件）
+- 建立 AI_reference.md（本文件）
+
 --- 互動 2 ---
 使用者 prompt：階段 1 — 專案建立、Tiled 安裝、素材匯入、level1.tmx 製作
                （Canvas 1280x720、Box2D、TiledMap 三層結構、Objects 標記點）
@@ -70,19 +84,32 @@ Claude 產出：
   Frame 分組（初版，可依實際 sprite 調整）：
     idle=[0], walk=[1,2,3], air=[5], dead=[6]。
 
---- 互動 1 ---
-使用者 prompt：閱讀作業簡報，確認規格與技術限制，規劃專案架構
-               （Cocos Creator 版本、配分、目錄結構、實作順序）
+
+--- 互動 5 ---
+使用者 prompt：階段 3 除錯與鏡頭調整
+               （修正移動/跳躍/sprite 方向問題、補左邊界、鏡頭偏移）
 Claude 產出：
-- 分析 2026(Spring)_SS-Assignment_02_Web Mario.pptx 完整內容
-- 確認無 Cocos Creator 版本限制，決定使用 2.4.8
-- 規劃完整目錄結構（managers / player / enemies / items / world / ui）
-- 規劃 Firebase Firestore 資料結構（users、leaderboard collection）
-- 規劃玩家狀態機（SMALL / BIG / DEAD）
-- 規劃碰撞分層（player / enemy / ground / item / block）
-- 建立 CLAUDEREADME.md（專案記憶檔）
-- 建立 README.md（作業繳交用說明文件）
-- 建立 AI_reference.md（本文件）
+- 修改 assets/scripts/player/Player.ts
+  （① cc.sys.isKeyPressed→cc.systemEvent 事件式按鍵追蹤；
+   ② contact-count 地面偵測改為 velocity+lockout（lockout 0.75s 防雙跳）；
+   ③ zIndex=100 + scheduleOnce removeChild/addChild 確保 Player 在 Map 之上；
+   ④ 新增 mapLeftBoundary 屬性 + enforceLeftBoundary()，阻止 Mario 走出地圖左緣）
+- 修改 assets/scripts/world/CameraFollow.ts
+  （新增 lookaheadX 屬性（預設 150），讓鏡頭向右偏移，Mario 顯示在畫面偏左）
+- 修改 assets/scripts/player/PlayerAnim.ts
+  （① getSpriteFrame 加 .png 後綴 fallback；
+   ② idle/walk/air frame 改用正面 frame：mario_small_11/15/18，
+     捨棄 frame 0（背面進水管 frame））
+- 修正 resources/tilemaps/level1.tmx + mario_tiles.tsx
+  （TMX version 再次從 1.10 回退，重新 sed 修回 1.2）
+
+修改說明：
+  cc.sys.isKeyPressed 在 CC2.4.8 不存在，須改用 cc.systemEvent KEY_DOWN/UP 事件。
+  contact-count 因 CC2.4.8 的 Box2D 回呼不穩定而改為 velocity-based：
+    isGrounded = abs(vy) < 15 && jumpLockout <= 0。
+  mario_small_0 是 NES Mario 進水管的背面 frame，不可用於 idle；
+    改用 sprite sheet row 0 col 1 的 mario_small_11 作為正面 idle 起始 frame。
+  TMX 每次用 Tiled 重新儲存就會被蓋回 1.10，需在每次 commit 前確認版本。
 
 修改說明：
   以上為純規劃討論與文件建立，尚未撰寫任何遊戲程式碼。

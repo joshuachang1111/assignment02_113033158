@@ -12,6 +12,11 @@ export default class Player extends cc.Component {
     @property
     jumpSpeed: number = 700;
 
+    // Map left edge in world space (Map.x=-640, anchor=0 → left wall at -640).
+    // Player collider half-width = 14*scale3/2 = 21, so center limit = -619.
+    @property
+    mapLeftBoundary: number = -619;
+
     // ── public state (read by PlayerAnim / enemies / items) ──────────────────
     public playerState: PlayerState = PlayerState.SMALL;
     public isFacingRight: boolean = true;
@@ -20,13 +25,18 @@ export default class Player extends cc.Component {
     private rb: cc.RigidBody = null;
     private col: cc.PhysicsBoxCollider = null;
 
-    private groundContacts: number = 0;
-    private jumpPressed: boolean = false;       // tracks "was jump held last frame"
+    // Velocity-based grounded: after a jump, lock out re-jump for 0.75 s so
+    // the player can't double-jump at the apex where vy ≈ 0 again.
+    private jumpLockout: number = 0;
+    private jumpPressed: boolean = false;
 
     private isInvincible: boolean = false;
     private invincibleTimer: number = 0;
 
     private spawnPos: cc.Vec2 = cc.v2(0, 0);
+
+    // key state map — CC2.4.8 has no cc.sys.isKeyPressed; track via events
+    private keys: { [code: number]: boolean } = {};
 
     // ── lifecycle ────────────────────────────────────────────────────────────
 
@@ -41,23 +51,44 @@ export default class Player extends cc.Component {
         this.spawnPos = cc.v2(this.node.x, this.node.y);
 
         cc.director.getPhysicsManager().enabledContactListener = true;
+
+        // Move Player to last sibling so it renders on top of the TiledMap.
+        // scheduleOnce(0) runs after all nodes finish onLoad.
+        this.node.zIndex = 100;
+        this.scheduleOnce(() => {
+            const parent = this.node.parent;
+            if (parent) {
+                parent.removeChild(this.node, false);
+                parent.addChild(this.node);
+                this.node.zIndex = 100;
+            }
+        }, 0);
+
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP,   this.onKeyUp,   this);
     }
 
-    // ── contact callbacks (called by Box2D via CC) ────────────────────────────
-
-    onBeginContact(_c: cc.PhysicsContact, _self: cc.PhysicsCollider, _other: cc.PhysicsCollider) {
-        this.groundContacts++;
+    onDestroy() {
+        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP,   this.onKeyUp,   this);
     }
 
-    onEndContact(_c: cc.PhysicsContact, _self: cc.PhysicsCollider, _other: cc.PhysicsCollider) {
-        this.groundContacts = Math.max(0, this.groundContacts - 1);
-    }
+    private onKeyDown(e: cc.Event.EventKeyboard) { this.keys[e.keyCode] = true;  }
+    private onKeyUp  (e: cc.Event.EventKeyboard) { this.keys[e.keyCode] = false; }
+    private key(code: number): boolean { return !!this.keys[code]; }
+
+    // ── contact callbacks — kept for Stage 4/5 (enemies, blocks) ────────────
+
+    onBeginContact(_c: cc.PhysicsContact, _self: cc.PhysicsCollider, _other: cc.PhysicsCollider) {}
+    onEndContact  (_c: cc.PhysicsContact, _self: cc.PhysicsCollider, _other: cc.PhysicsCollider) {}
 
     // ── getters ───────────────────────────────────────────────────────────────
 
-    // Velocity check prevents "grounded" while bonking a ceiling
+    // Velocity-based: standing on ground → vy ≈ 0.
+    // jumpLockout prevents double-jump at the apex where vy briefly ≈ 0 again.
     get isGrounded(): boolean {
-        return this.groundContacts > 0 && this.rb.linearVelocity.y < 50;
+        if (this.jumpLockout > 0) return false;
+        return Math.abs(this.rb.linearVelocity.y) < 15;
     }
 
     get rigidbody(): cc.RigidBody { return this.rb; }
@@ -66,18 +97,20 @@ export default class Player extends cc.Component {
 
     update(dt: number) {
         if (this.playerState === PlayerState.DEAD) return;
+        if (this.jumpLockout > 0) this.jumpLockout -= dt;
         this.handleInvincible(dt);
         this.handleMovement();
+        this.enforceLeftBoundary();
     }
 
     // ── private helpers ───────────────────────────────────────────────────────
 
     private handleMovement() {
-        const left  = cc.sys.isKeyPressed(cc.macro.KEY.left)  || cc.sys.isKeyPressed(cc.macro.KEY.a);
-        const right = cc.sys.isKeyPressed(cc.macro.KEY.right) || cc.sys.isKeyPressed(cc.macro.KEY.d);
-        const jumpDown = cc.sys.isKeyPressed(cc.macro.KEY.up)
-                      || cc.sys.isKeyPressed(cc.macro.KEY.w)
-                      || cc.sys.isKeyPressed(cc.macro.KEY.space);
+        const left  = this.key(cc.macro.KEY.left)  || this.key(cc.macro.KEY.a);
+        const right = this.key(cc.macro.KEY.right) || this.key(cc.macro.KEY.d);
+        const jumpDown = this.key(cc.macro.KEY.up)
+                      || this.key(cc.macro.KEY.w)
+                      || this.key(cc.macro.KEY.space);
 
         const jumpJustPressed = jumpDown && !this.jumpPressed;
         this.jumpPressed = jumpDown;
@@ -88,6 +121,7 @@ export default class Player extends cc.Component {
 
         if (jumpJustPressed && this.isGrounded) {
             this.rb.linearVelocity = cc.v2(vx, this.jumpSpeed);
+            this.jumpLockout = 0.75;   // blocks re-jump until past the apex
         } else {
             this.rb.linearVelocity = cc.v2(vx, this.rb.linearVelocity.y);
         }
@@ -101,6 +135,20 @@ export default class Player extends cc.Component {
         if (this.invincibleTimer <= 0) {
             this.isInvincible = false;
             this.node.opacity = 255;
+        }
+    }
+
+    private enforceLeftBoundary() {
+        const worldX = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO).x;
+        if (worldX < this.mapLeftBoundary) {
+            // Stop leftward velocity and push node back to boundary
+            if (this.rb.linearVelocity.x < 0) {
+                this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
+            }
+            const localBound = this.node.parent
+                ? this.node.parent.convertToNodeSpaceAR(cc.v2(this.mapLeftBoundary, 0)).x
+                : this.mapLeftBoundary;
+            this.node.x = localBound;
         }
     }
 

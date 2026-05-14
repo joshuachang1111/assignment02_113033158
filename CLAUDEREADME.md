@@ -234,6 +234,19 @@ DEAD + lives == 0 ──→ GameOver
 
 ---
 
+## 已知問題 / 注意事項
+
+- **TMX 版本**：每次用 Tiled 重新儲存 level1.tmx，會自動被蓋回 `version="1.10"`。commit 前務必執行：
+  ```bash
+  sed -i '' 's/version="1\.10" tiledversion="1\.12\.1"/version="1.2"/' \
+    MarioGame/assets/resources/tilemaps/level1.tmx \
+    MarioGame/assets/resources/tilemaps/mario_tiles.tsx
+  ```
+- **Sprite Frame 0**：`mario_small_0` 是 Mario 進水管的背面 frame，不能用於 idle/walk。
+- **CameraFollow.playerNode**：每次重建 Player prefab 後，Main Camera 的 playerNode 需重新拖入。
+
+---
+
 ## 重要提醒
 
 - **每次開始實作前，必須先與 Claude 討論確認再開始寫程式**
