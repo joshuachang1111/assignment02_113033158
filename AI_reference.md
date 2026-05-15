@@ -263,3 +263,27 @@ Claude 產出：
   目前所有 Label 改用系統字型 + 顏色代替，字型套用留待後續處理。
 
 ---
+
+--- 互動 12 ---
+使用者 prompt：Stage 8 音效系統
+Claude 產出：
+- 新增 assets/scripts/managers/AudioManager.ts
+  （cc.Component 靜態單例，onLoad 呼叫 addPersistRootNode 跨場景存活；
+   playBGM 跳過相同 clip 重複播放；stopBGM；playSFX one-shot；
+   11 個 @property AudioClip 欄位：bgm1~3、sfxJump/Stomp/Die/GameOver/PowerUp/PowerDown/PowerUpAppear/LevelClear）
+- 修改 MainMenuUI.ts：start() 播 bgm1
+- 修改 LevelSelectUI.ts：start() 播 bgm1（相同 clip 不重啟）
+- 修改 HUD.ts：start() 依 currentLevel 播 bgm2 或 bgm3
+- 修改 Player.ts：跳躍播 sfxJump、die() stopBGM + sfxDie、縮小播 sfxPowerDown
+- 修改 Goomba.ts：onStomped 播 sfxStomp
+- 修改 Mushroom.ts：收集時播 sfxPowerUp
+- 修改 QuestionBlock.ts：onHit 播 sfxPowerUpAppear
+- 修改 GameOverUI.ts：lives<=0 時播 sfxGameOver
+
+修改說明：
+  AudioManager 節點必須是 Scene 的直接子節點（與 Canvas 同層），
+  不能是 Canvas 子節點，否則 addPersistRootNode 無效。
+  所有 AudioClip 欄位需在 MainMenu.fire 的 AudioManager 組件 Inspector 中手動拖入，
+  跨場景後 instance 仍有效，bgm2/3 和所有 SFX 才能正常播放。
+
+---

@@ -43,10 +43,12 @@ Mario 風格的橫向捲軸遊戲，共兩關。
 
 ### 動畫與音效
 
-- [ ] 玩家行走、跳躍動畫
-- [ ] 敵人動畫
-- [ ] BGM（關卡中持續播放）
-- [ ] 跳躍、死亡、踩敵人、金幣等音效
+- [x] 玩家行走、跳躍、死亡動畫（PlayerAnim）
+- [x] 玩家變大/縮小閃爍動畫
+- [x] Goomba 行走動畫
+- [x] BGM：MainMenu/LevelSelect → bgm1，Level 1 → bgm2，Level 2 → bgm3
+- [x] 跳躍、死亡、踩敵人音效
+- [x] 吃蘑菇（PowerUp）、縮小（PowerDown）、蘑菇出現、GameOver 音效
 
 ### UI
 

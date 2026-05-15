@@ -2,6 +2,7 @@ import EnemyBase from './EnemyBase';
 import Player from '../player/Player';
 import { PlayerState } from '../player/PlayerState';
 import GameManager from '../managers/GameManager';
+import AudioManager from '../managers/AudioManager';
 
 const { ccclass, property } = cc._decorator;
 
@@ -102,6 +103,7 @@ export default class Goomba extends EnemyBase {
         this.setFrame(this.SQUISH_FRAME);
         this.player.stomp();
         GameManager.addScore(100);
+        AudioManager.playSFX(AudioManager.I?.sfxStomp);
         this.scheduleOnce(() => this.node.destroy(), 0.4);
     }
 

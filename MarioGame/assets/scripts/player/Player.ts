@@ -1,5 +1,6 @@
 import { PlayerState } from './PlayerState';
 import GameManager from '../managers/GameManager';
+import AudioManager from '../managers/AudioManager';
 
 const { ccclass, property, requireComponent } = cc._decorator;
 
@@ -130,6 +131,7 @@ export default class Player extends cc.Component {
         if (jumpJustPressed && this.isGrounded) {
             this.rb.linearVelocity = cc.v2(vx, this.jumpSpeed);
             this.jumpLockout = 0.75;   // blocks re-jump until past the apex
+            AudioManager.playSFX(AudioManager.I?.sfxJump);
         } else {
             this.rb.linearVelocity = cc.v2(vx, this.rb.linearVelocity.y);
         }
@@ -194,6 +196,8 @@ export default class Player extends cc.Component {
         if (this.playerState === PlayerState.DEAD) return;
         this.playerState = PlayerState.DEAD;
         this.groundContacts = 0;
+        AudioManager.stopBGM();
+        AudioManager.playSFX(AudioManager.I?.sfxDie);
         // make sensor so player passes through level geometry during death arc
         this.col.sensor = true;
         this.col.apply();
@@ -232,6 +236,7 @@ export default class Player extends cc.Component {
                     this.playerState = PlayerState.BIG;
                 } else {
                     this.playerState = PlayerState.SMALL;
+                    AudioManager.playSFX(AudioManager.I?.sfxPowerDown);
                     this.startInvincible(2.0);
                 }
                 this.applyColliderSize();

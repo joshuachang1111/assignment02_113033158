@@ -1,4 +1,5 @@
 import GameManager from '../managers/GameManager';
+import AudioManager from '../managers/AudioManager';
 import Player from '../player/Player';
 import { PlayerState } from '../player/PlayerState';
 
@@ -19,12 +20,16 @@ export default class HUD extends cc.Component {
     private player: Player = null;
 
     start() {
+        const bgm = GameManager.currentLevel === 2
+            ? AudioManager.I?.bgm3
+            : AudioManager.I?.bgm2;
+        AudioManager.playBGM(bgm);
+
         const pNode = cc.find('Canvas/World/Player');
         if (pNode) this.player = pNode.getComponent(Player);
     }
 
     update(dt: number) {
-        // Countdown only while player is alive
         if (this.player && this.player.playerState !== PlayerState.DEAD) {
             GameManager.timer -= dt;
             if (GameManager.timer <= 0) {

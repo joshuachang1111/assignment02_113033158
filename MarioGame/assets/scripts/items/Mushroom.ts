@@ -1,5 +1,6 @@
 import Player from '../player/Player';
 import { PlayerState } from '../player/PlayerState';
+import AudioManager from '../managers/AudioManager';
 
 const { ccclass, property } = cc._decorator;
 
@@ -105,6 +106,7 @@ export default class Mushroom extends cc.Component {
 
         if (dx > this.OVERLAP_X || dy > overlapY) return;
 
+        AudioManager.playSFX(AudioManager.I?.sfxPowerUp);
         this.player.growBig();
         this.node.destroy();
     }

@@ -1,4 +1,5 @@
 import GameManager from '../managers/GameManager';
+import AudioManager from '../managers/AudioManager';
 
 const { ccclass, property } = cc._decorator;
 
@@ -15,6 +16,7 @@ export default class LevelSelectUI extends cc.Component {
     coinsLabel: cc.Label = null;
 
     start() {
+        AudioManager.playBGM(AudioManager.I?.bgm1);
         this.updateLabels();
     }
 

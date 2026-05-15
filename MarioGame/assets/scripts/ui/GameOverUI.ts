@@ -1,4 +1,5 @@
 import GameManager from '../managers/GameManager';
+import AudioManager from '../managers/AudioManager';
 
 const { ccclass, property } = cc._decorator;
 
@@ -20,6 +21,7 @@ export default class GameOverUI extends cc.Component {
     private handleLoseLife(lives: number) {
         this.node.active = true;
         if (lives <= 0) {
+            AudioManager.playSFX(AudioManager.I?.sfxGameOver);
             if (this.returnButton) this.returnButton.active = true;
         } else {
             if (this.returnButton) this.returnButton.active = false;

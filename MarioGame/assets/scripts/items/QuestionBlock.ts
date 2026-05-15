@@ -1,5 +1,6 @@
 import Player from '../player/Player';
 import { PlayerState } from '../player/PlayerState';
+import AudioManager from '../managers/AudioManager';
 
 const { ccclass, property } = cc._decorator;
 
@@ -93,6 +94,7 @@ export default class QuestionBlock extends cc.Component {
         this.originY   = this.node.y;
         this.bumpTimer = this.BUMP_DURATION;
         this.setFrame(this.EMPTY_FRAME);
+        AudioManager.playSFX(AudioManager.I?.sfxPowerUpAppear);
         this.spawnMushroom();
     }
 
