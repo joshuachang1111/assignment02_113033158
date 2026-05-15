@@ -50,9 +50,11 @@ Mario 風格的橫向捲軸遊戲，共兩關。
 
 ### UI
 
-- [ ] 主選單、關卡選擇
-- [ ] HUD：命數、分數、計時器
-- [ ] Game Over、過關畫面
+- [x] 主選單（MainMenu）：START GAME 按鈕，進入 LevelSelect
+- [x] 關卡選擇（LevelSelect）：顯示當前命數、累積金幣、最高分數，STAGE 1 / STAGE 2 按鈕
+- [x] HUD：命數、分數（前綴 SCORE:）、計時器（前綴 TIME:，倒數至 0 玩家死亡）
+- [x] Game Over 畫面：每次死亡顯示，命歸零時出現 Return 按鈕回主選單
+- [ ] 過關畫面（LevelClear）：腳本已寫，尚未接旗竿觸發
 
 ### Firebase 功能（Bonus）
 

@@ -1,6 +1,7 @@
 import EnemyBase from './EnemyBase';
 import Player from '../player/Player';
 import { PlayerState } from '../player/PlayerState';
+import GameManager from '../managers/GameManager';
 
 const { ccclass, property } = cc._decorator;
 
@@ -100,7 +101,7 @@ export default class Goomba extends EnemyBase {
         this.die();
         this.setFrame(this.SQUISH_FRAME);
         this.player.stomp();
-        // TODO Stage 6: GameManager.getInstance().addScore(100);
+        GameManager.addScore(100);
         this.scheduleOnce(() => this.node.destroy(), 0.4);
     }
 

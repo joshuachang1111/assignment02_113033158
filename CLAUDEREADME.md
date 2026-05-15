@@ -224,8 +224,8 @@ DEAD + lives == 0 ──→ GameOver
 | 3 | Player 控制 + 狀態機 + Camera 跟隨 | ✅ 完成 |
 | 4 | Goomba 敵人 + 頭踩判定 | ✅ 完成 |
 | 5 | QuestionBlock + Mushroom 道具系統 | ✅ 完成 |
-| 6 | 傷害/死亡/重生 + GameManager 全域狀態 | |
-| 7 | UI（HUD + 所有選單場景）| |
+| 6 | 傷害/死亡/重生 + GameManager 全域狀態 | ✅ 完成 |
+| 7 | UI（HUD + 所有選單場景）| ✅ 完成 |
 | 8 | 動畫（Sprite Animation）+ 音效 | |
 | 9 | Level 2 關卡設計 + Turtle 敵人 | |
 | 10 | Firebase 整合（登入、存檔、排行榜）| |
@@ -243,6 +243,8 @@ DEAD + lives == 0 ──→ GameOver
   執行後在 CC 對 level1 右鍵 → Reimport Asset。
 - **Sprite Frame 0**：`mario_small_0` 是 Mario 進水管的背面 frame，不能用於 idle/walk。
 - **CameraFollow.playerNode**：每次重建 Player prefab 後，Main Camera 的 playerNode 需重新拖入。
+- **⚠️ 字型尚未套用**：目前所有場景（MainMenu、LevelSelect、Game 的 HUD/GameOverPanel）的 Label 節點**全部都沒有套用 yellow_font / white_font**，目前用系統字型代替。Button 裡的 Label 尤其麻煩——bitmap font 在 CC2.4.8 的 Button 子 Label 上會遇到 Size W 無法修改、文字只顯示一個字元等問題。之後需要統一處理字型套用。
+- **bitmap font 在 CC2.4.8 的已知限制**：Label 節點的 Size W 會被 bitmap font 鎖死，導致文字被截斷。解法是設 Overflow=NONE 並把 W 設足夠大，或改用系統字型加顏色代替。
 
 ---
 

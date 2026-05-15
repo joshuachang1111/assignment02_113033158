@@ -1,4 +1,5 @@
 import { PlayerState } from './PlayerState';
+import GameManager from '../managers/GameManager';
 
 const { ccclass, property, requireComponent } = cc._decorator;
 
@@ -202,15 +203,9 @@ export default class Player extends cc.Component {
     }
 
     private respawn() {
-        this.playerState = PlayerState.SMALL;
-        this.node.setPosition(this.spawnPos.x, this.spawnPos.y);
-        this.rb.linearVelocity = cc.v2(0, 0);
-        this.groundContacts = 0;
         this.node.opacity = 255;
-        this.col.sensor = false;
-        this.applyColliderSize();
-        this.startInvincible(2.0);
-        // TODO Stage 6: GameManager.getInstance().loseLife()
+        GameManager.loseLife();
+        // GameOverUI handles scene reload or game over screen
     }
 
     growBig() {

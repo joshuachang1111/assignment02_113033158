@@ -231,3 +231,35 @@ Claude 產出：
   改為動態計算（BIG: 24+39+8=71）修正。
 
 ---
+
+--- 互動 11 ---
+使用者 prompt：Stage 6+7 合併：GameManager、HUD、所有 UI 場景設定
+Claude 產出：
+- 新增 assets/scripts/managers/GameManager.ts
+  （靜態類別管理 lives/score/timer/currentLevel/highScore/coins；
+   addScore() 同步更新 highScore；addCoins()；loseLife() 觸發 onLoseLife callback）
+- 新增 assets/scripts/ui/HUD.ts
+  （每幀更新 SCORE:/TIME: 前綴 + 數值；計時歸零呼叫 player.die()）
+- 新增 assets/scripts/ui/GameOverUI.ts
+  （onLoad 時設 active=false 並綁 GameManager.onLoseLife；
+   每次死亡顯示面板；lives<=0 才顯示 ReturnButton；lives>0 等 2.5s 重載關卡）
+- 新增 assets/scripts/ui/MainMenuUI.ts
+  （onStartClicked: startNewGame + loadScene LevelSelect）
+- 新增 assets/scripts/ui/LevelSelectUI.ts
+  （start 時從 GameManager 讀 lives/highScore/coins 更新 Label；
+   onLevel1/2Clicked: 設 currentLevel + loadScene Game；不重置遊戲狀態）
+- 新增 assets/scripts/ui/LevelClearUI.ts
+  （show: 加時間分數 × 30，4s 後跳 LevelSelect）
+- 修改 assets/scripts/enemies/Goomba.ts
+  （onStomped 加 GameManager.addScore(100)）
+- 修改 MainMenu.fire、LevelSelect.fire、Game.fire
+  （場景節點設定：HUDPanel、Stage1/2Button、GameOverPanel 等）
+
+修改說明：
+  GameOverPanel 必須在 Editor 中保持 active=true，讓 onLoad 執行後腳本自行設 false。
+  若在 Editor 直接設 active=false，onLoad 不觸發，callback 無法註冊。
+  HUD 與 GameOverPanel 須為 Main Camera 子節點，否則跟隨 Camera 移動而滾動。
+  bitmap font（yellow_font）在 CC2.4.8 Button 子 Label 上的 Size W 會被鎖死，
+  目前所有 Label 改用系統字型 + 顏色代替，字型套用留待後續處理。
+
+---
