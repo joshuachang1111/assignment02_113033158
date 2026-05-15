@@ -176,4 +176,33 @@ Claude 產出：
   將 Mario 摩擦力設為 0 後合力摩擦 = 0，貼牆只受重力，自然下滑。
   地面移動不受影響（移動靠直接設 linearVelocity，不依賴摩擦力）。
 
+--- 互動 9 ---
+使用者 prompt：Stage 5 — QuestionBlock + Mushroom 實作（問號磚塊彈出蘑菇）
+Claude 產出：
+- 新增 assets/scripts/items/QuestionBlock.ts
+  （4 幀動畫：items_10~13；checkHit() 偵測玩家從下方頂到方塊；
+   Bump 動畫：sine wave 12 world units / 0.15s；
+   onHit：切換 items_14 空方塊 + spawnMushroom()；
+   spawnMushroom：instantiate → parent=World → 位置為方塊頂端 +48 world px）
+- 新增 assets/scripts/items/Mushroom.ts
+  （emergeTimer=0.4s 浮出動畫；走路速度 60；
+   相同 velocity-stuck 反轉機制（reverseCooldown=0.15 初始值）；
+   AABB overlap 偵測玩家 → player.growBig() + node.destroy()；
+   col.friction=0 防側面卡牆；貼圖：items_46.png）
+- 修改 assets/scripts/world/LevelLoader.ts
+  （新增 @property questionBlockPrefab；
+   新增 spawnObjects()：讀 Objects layer，對 name='question_block' 的 Point
+   instantiate prefab 並放到 World 節點；
+   新增 tiledToWorld()：轉換 Tiled 物件座標到世界座標）
+- 新增 fix-tmx.sh（一鍵修正 TMX version 1.10→1.2 腳本）
+
+修改說明：
+  CC 2.4.8 讀取 Objects layer 時 obj['y'] 已做過 Y 翻轉
+  （CC local Y-up，= mapHeight_px - tiled_y），
+  tiledToWorld 原本把 obj['y'] 當作 Tiled Y-down 再翻一次，導致雙重翻轉，
+  方塊出現在畫面頂端。
+  修正：先 recover tiledY = numRows*tileH - oy，再執行標準 row 計算。
+  蘑菇 sprite 原本設定 items_32（錯誤），
+  確認 items.plist 實際 grid 後修正為 items_46（col 3, row 11）。
+
 ---

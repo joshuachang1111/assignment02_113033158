@@ -35,11 +35,11 @@ Mario 風格的橫向捲軸遊戲，共兩關。
 
 - [x] World Map：物理重力、背景與 Camera 跟隨玩家（含 lookahead 偏移）
 - [x] Level Design：Static 牆壁與地板（TiledMap Ground layer 自動生成碰撞體）
-- [ ] Level Design：問號磚
+- [x] Level Design：問號磚（Objects layer Tiled Point → CC prefab 自動生成）
 - [x] Player：鍵盤控制、受傷/死亡/重生、大小狀態切換
 - [x] Enemies：Goomba — 走路動畫、碰牆轉向、踩頭擊殺/被側碰傷害玩家
 - [ ] Enemies：Turtle
-- [ ] Question Blocks：超級蘑菇
+- [x] Question Blocks：超級蘑菇（頂到磚塊彈出蘑菇、觸碰蘑菇 Mario 變大）
 
 ### 動畫與音效
 

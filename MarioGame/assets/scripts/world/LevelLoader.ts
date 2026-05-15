@@ -3,6 +3,9 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class LevelLoader extends cc.Component {
 
+    @property(cc.Prefab)
+    questionBlockPrefab: cc.Prefab = null;
+
     onLoad() {
         const physics = cc.director.getPhysicsManager();
         physics.enabled = true;
@@ -39,11 +42,52 @@ export default class LevelLoader extends cc.Component {
         }
 
         this.spawnBoundaryWalls(numCols, numRows, tileSize);
-        cc.log('[LevelLoader] Ground colliders + boundary walls generated');
+        this.spawnObjects(numRows, tileSize);
+        cc.log('[LevelLoader] Ground colliders + boundary walls + objects generated');
+    }
+
+    // Read the Objects layer and spawn prefabs for known types
+    private spawnObjects(numRows: number, tileSize: cc.Size) {
+        const tiledMap = this.getComponent(cc.TiledMap);
+        const group    = tiledMap.getObjectGroup('Objects');
+        if (!group) return;
+        const objects = group.getObjects();
+        if (!objects) return;
+
+        const world = cc.find('Canvas/World');
+        if (!world) { cc.warn('[LevelLoader] Canvas/World not found'); return; }
+
+        for (const obj of objects) {
+            if (obj['name'] === 'question_block') {
+                if (!this.questionBlockPrefab) {
+                    cc.warn('[LevelLoader] questionBlockPrefab not assigned on Map node');
+                    continue;
+                }
+                const pos  = this.tiledToWorld(obj['x'], obj['y'], numRows, tileSize);
+                const node = cc.instantiate(this.questionBlockPrefab);
+                node.parent = world;
+                node.setPosition(pos.x, pos.y);
+            }
+            // goomba / turtle / flagpole will be handled in later stages
+        }
+    }
+
+    // Convert object coords to world bottom-center of the tile.
+    // CC 2.4.x already flips obj['y'] to Y-up from map bottom, so we
+    // convert back to Tiled Y-down before the standard row calculation.
+    private tiledToWorld(ox: number, oy: number, numRows: number, tileSize: cc.Size): cc.Vec2 {
+        const col     = Math.floor(ox / tileSize.width);
+        const localXc = col * tileSize.width + tileSize.width / 2;
+        const tiledY  = numRows * tileSize.height - oy;   // undo CC's Y-flip
+        const row     = Math.floor(tiledY / tileSize.height);
+        const localY  = (numRows - 1 - row) * tileSize.height;
+        return cc.v2(
+            localXc * this.node.scaleX + this.node.x,
+            localY  * this.node.scaleY + this.node.y,
+        );
     }
 
     private spawnBoundaryWalls(numCols: number, numRows: number, tileSize: cc.Size) {
-        // Wall is 1 tile wide, 2× map height so it covers above and below the visible area
         const wallW   = tileSize.width;
         const wallH   = (numRows + 8) * tileSize.height;
         const centerY = numRows * tileSize.height / 2;
