@@ -33,6 +33,9 @@ export default class Player extends cc.Component {
     private isInvincible: boolean = false;
     private invincibleTimer: number = 0;
 
+    public isTransforming: boolean = false;
+    public displayBig: boolean = false;
+
     private spawnPos: cc.Vec2 = cc.v2(0, 0);
 
     // key state map — CC2.4.8 has no cc.sys.isKeyPressed; track via events
@@ -106,6 +109,10 @@ export default class Player extends cc.Component {
     // ── private helpers ───────────────────────────────────────────────────────
 
     private handleMovement() {
+        if (this.isTransforming) {
+            this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
+            return;
+        }
         const left  = this.key(cc.macro.KEY.left)  || this.key(cc.macro.KEY.a);
         const right = this.key(cc.macro.KEY.right) || this.key(cc.macro.KEY.d);
         const jumpDown = this.key(cc.macro.KEY.up)
@@ -174,10 +181,9 @@ export default class Player extends cc.Component {
 
     takeDamage() {
         if (this.isInvincible || this.playerState === PlayerState.DEAD) return;
+        if (this.isTransforming) return;
         if (this.playerState === PlayerState.BIG) {
-            this.playerState = PlayerState.SMALL;
-            this.applyColliderSize();
-            this.startInvincible(2.0);
+            this.startTransformAnim(false);
         } else {
             this.die();
         }
@@ -209,8 +215,34 @@ export default class Player extends cc.Component {
 
     growBig() {
         if (this.playerState !== PlayerState.SMALL) return;
-        this.playerState = PlayerState.BIG;
-        this.applyColliderSize();
+        if (this.isTransforming) return;
+        this.startTransformAnim(true);
+    }
+
+    private startTransformAnim(growingToBig: boolean) {
+        this.isTransforming = true;
+        this.displayBig     = !growingToBig;   // start from current appearance
+
+        const totalFlashes = 8;
+        let   count        = 0;
+
+        const flash = () => {
+            count++;
+            this.displayBig = (count % 2 === 1) ? growingToBig : !growingToBig;
+            if (count >= totalFlashes) {
+                this.unschedule(flash);
+                this.displayBig     = growingToBig;
+                this.isTransforming = false;
+                if (growingToBig) {
+                    this.playerState = PlayerState.BIG;
+                } else {
+                    this.playerState = PlayerState.SMALL;
+                    this.startInvincible(2.0);
+                }
+                this.applyColliderSize();
+            }
+        };
+        this.schedule(flash, 0.07);
     }
 
     // Called by enemies when player stomps them — small upward bounce

@@ -84,8 +84,10 @@ export default class PlayerAnim extends cc.Component {
         }
 
         // ── apply sprite frame ────────────────────────────────────────────────
-        const isBig  = this.player.playerState === PlayerState.BIG;
-        const atlas  = isBig ? this.bigAtlas : this.smallAtlas;
+        const showBig = this.player.isTransforming
+            ? this.player.displayBig
+            : this.player.playerState === PlayerState.BIG;
+        const atlas  = showBig ? this.bigAtlas : this.smallAtlas;
         if (!atlas) return;
         const name  = frames[this.frameIndex];
         // CC2.4.8 may store frame names with or without .png suffix
@@ -97,13 +99,16 @@ export default class PlayerAnim extends cc.Component {
 
     private resolveAnim(): AnimState {
         if (this.player.playerState === PlayerState.DEAD) return AnimState.DEAD;
+        if (this.player.isTransforming) return AnimState.IDLE;
         if (!this.player.isGrounded) return AnimState.AIR;
         const vx = this.rb ? this.rb.linearVelocity.x : 0;
         return Math.abs(vx) > 10 ? AnimState.WALK : AnimState.IDLE;
     }
 
     private getFrameNames(): string[] {
-        const isBig = this.player.playerState === PlayerState.BIG;
+        const isBig = this.player.isTransforming
+            ? this.player.displayBig
+            : this.player.playerState === PlayerState.BIG;
         return (isBig ? FRAMES.big : FRAMES.small)[this.currentAnim];
     }
 }

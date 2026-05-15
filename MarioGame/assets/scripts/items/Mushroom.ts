@@ -97,9 +97,13 @@ export default class Mushroom extends cc.Component {
         const pPos  = this.player.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
 
         const dx = Math.abs(myPos.x - pPos.x);
-        const dy = Math.abs((myPos.y + 24) - (pPos.y + 24));
 
-        if (dx > this.OVERLAP_X || dy > this.OVERLAP_Y) return;
+        // Half-heights in world space: mushroom=24, SMALL=24, BIG=39
+        const playerHalfH = this.player.playerState === PlayerState.BIG ? 39 : 24;
+        const overlapY    = 24 + playerHalfH + 8;
+        const dy = Math.abs((myPos.y + 24) - (pPos.y + playerHalfH));
+
+        if (dx > this.OVERLAP_X || dy > overlapY) return;
 
         this.player.growBig();
         this.node.destroy();

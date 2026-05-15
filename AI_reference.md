@@ -205,4 +205,29 @@ Claude 產出：
   蘑菇 sprite 原本設定 items_32（錯誤），
   確認 items.plist 實際 grid 後修正為 items_46（col 3, row 11）。
 
+--- 互動 10 ---
+使用者 prompt：變大/縮小時加入逐幀閃爍動畫，動畫期間凍結移動
+Claude 產出：
+- 修改 assets/scripts/player/Player.ts
+  （新增 isTransforming / displayBig 公開旗標；
+   growBig() 與 takeDamage() 改為呼叫 startTransformAnim()，狀態與碰撞體在動畫結束後才改；
+   startTransformAnim()：this.schedule(flash, 0.07) × 8 格交替 displayBig，結束後 unschedule；
+   handleMovement() 加 if (isTransforming) return 凍結輸入）
+- 修改 assets/scripts/player/PlayerAnim.ts
+  （atlas 選擇改用 showBig = isTransforming ? displayBig : playerState===BIG；
+   resolveAnim() 加 if (isTransforming) return IDLE；
+   getFrameNames() 同步改用 showBig）
+- 修改 assets/scripts/items/QuestionBlock.ts
+  （gap 上限從 80 改為 100，確保 BIG Mario 頂磚塊也能可靠觸發）
+- 修改 assets/scripts/items/Mushroom.ts
+  （checkPlayerOverlap 改為根據 playerState 動態計算 playerHalfH 與 overlapY；
+   BIG Mario: playerHalfH=39, overlapY=71，修正頭頂碰不到蘑菇的問題）
+
+修改說明：
+  scheduleOnce 對同一函式引用重複呼叫時 CC2.4.8 可能只執行一次（內部去重），
+  導致 isTransforming 永遠不被設回 false。改用 schedule + unschedule 解決。
+  BIG Mario 碰撞體高度 78（= 26*scale3），原本 OVERLAP_Y=56 寫死 SMALL 半高 24，
+  導致蘑菇在 BIG Mario 頭頂時 dy=63>56 被判為不重疊。
+  改為動態計算（BIG: 24+39+8=71）修正。
+
 ---

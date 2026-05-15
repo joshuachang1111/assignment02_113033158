@@ -82,8 +82,8 @@ export default class QuestionBlock extends cc.Component {
         // gap: distance from player bottom to block bottom (positive = player below block)
         const gap = myWorld.y - pWorld.y;
 
-        // Player must be horizontally aligned and below-but-close to block bottom
-        if (dx < this.HIT_RANGE_X && gap > 0 && gap < 80) {
+        // gap < 100 covers both small (top=48) and big (top=78) Mario
+        if (dx < this.HIT_RANGE_X && gap > 0 && gap < 100) {
             this.onHit();
         }
     }
