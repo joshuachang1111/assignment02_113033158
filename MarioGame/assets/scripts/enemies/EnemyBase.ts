@@ -30,6 +30,13 @@ export default class EnemyBase extends cc.Component {
 
     update(dt: number) {
         if (this.isDead) return;
+
+        // Fell into a pit — destroy silently (no score)
+        if (this.node.convertToWorldSpaceAR(cc.Vec2.ZERO).y < -500) {
+            this.node.destroy();
+            return;
+        }
+
         if (this.reverseCooldown > 0) this.reverseCooldown -= dt;
 
         // Left map boundary — reverse if past the edge

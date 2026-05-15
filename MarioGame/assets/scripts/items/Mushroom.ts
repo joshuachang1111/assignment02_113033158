@@ -51,6 +51,12 @@ export default class Mushroom extends cc.Component {
     }
 
     update(dt: number) {
+        // Fell into a pit — destroy silently
+        if (this.node.convertToWorldSpaceAR(cc.Vec2.ZERO).y < -500) {
+            this.node.destroy();
+            return;
+        }
+
         // Rise phase: emerge upward from the block
         if (this.emergeTimer > 0) {
             this.emergeTimer -= dt;

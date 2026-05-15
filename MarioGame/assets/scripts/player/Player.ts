@@ -106,6 +106,11 @@ export default class Player extends cc.Component {
         this.handleInvincible(dt);
         this.handleMovement();
         this.enforceLeftBoundary();
+
+        // Fell into a pit
+        if (this.node.convertToWorldSpaceAR(cc.Vec2.ZERO).y < -500) {
+            this.die();
+        }
     }
 
     // ── private helpers ───────────────────────────────────────────────────────
