@@ -287,3 +287,13 @@ Claude 產出：
   跨場景後 instance 仍有效，bgm2/3 和所有 SFX 才能正常播放。
 
 ---
+
+--- 互動 13 ---
+使用者 prompt：掉落洞裡的死亡判定
+Claude 產出：
+- 修改 EnemyBase.ts：update 開頭檢查 worldY < -500，直接 destroy（不加分）
+- 修改 Mushroom.ts：同上
+- 修改 Player.ts：update 結尾檢查 worldY < -500，呼叫 die()
+修改說明：用 Y 軸世界座標閾值偵測掉落，不需要額外 collider 或 Editor 設定。
+
+---
