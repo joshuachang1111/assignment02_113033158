@@ -162,4 +162,18 @@ Claude 產出：
   reverseCooldown=0.15 初始值解決第 1 幀 vx=0 觸發方向翻轉的問題。
   TMX version 每次用 Tiled 1.12.1 儲存就會被蓋成 1.10，已有 pre-commit hook 自動修正。
 
+--- 互動 8 ---
+使用者 prompt：修正 Mario 貼著懸浮方塊側面會卡住的問題
+Claude 產出：
+- 修改 assets/scripts/player/Player.ts
+  （在 applyColliderSize() 加入 this.col.friction = 0，
+   每次設定碰撞體大小時同時清除摩擦力）
+
+修改說明：
+  Box2D 計算兩碰撞體之間的摩擦力公式為 sqrt(f1 × f2)。
+  Mario 的 PhysicsBoxCollider 預設 friction = 0.2，貼著方塊側面時
+  Box2D 會施加向上的摩擦力抵消重力，造成卡牆。
+  將 Mario 摩擦力設為 0 後合力摩擦 = 0，貼牆只受重力，自然下滑。
+  地面移動不受影響（移動靠直接設 linearVelocity，不依賴摩擦力）。
+
 ---

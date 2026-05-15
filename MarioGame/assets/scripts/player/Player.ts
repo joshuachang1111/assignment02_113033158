@@ -161,6 +161,7 @@ export default class Player extends cc.Component {
             this.col.size   = cc.size(14, 16);
             this.col.offset = cc.v2(0, 8);
         }
+        this.col.friction = 0;   // prevent wall-sticking caused by side friction
         this.col.apply();
     }
 
