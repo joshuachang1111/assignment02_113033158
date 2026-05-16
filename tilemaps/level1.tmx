@@ -46,16 +46,16 @@
   <object id="2" name="goomba" x="391.591" y="192">
    <point/>
   </object>
-  <object id="4" name="turtle" x="648.451" y="143">
+  <object id="4" name="turtle" x="648.451" y="140.741">
    <point/>
   </object>
   <object id="5" name="flagpole" x="1408.27" y="193.194">
    <point/>
   </object>
-  <object id="6" name="turtle" x="911.262" y="136.152">
+  <object id="6" name="turtle" x="911.262" y="132.01">
    <point/>
   </object>
-  <object id="7" name="goomba" x="846.769" y="192">
+  <object id="7" name="goomba" x="843.38" y="189.741">
    <point/>
   </object>
   <object id="8" name="question_block" x="470.56" y="156.171">

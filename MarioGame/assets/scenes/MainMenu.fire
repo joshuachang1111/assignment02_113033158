@@ -15,6 +15,9 @@
     "_children": [
       {
         "__id__": 2
+      },
+      {
+        "__id__": 18
       }
     ],
     "_active": true,
@@ -769,5 +772,113 @@
     },
     "_enabled": true,
     "_id": "c6y2ob1s9LHa93HtYDPTO4"
+  },
+  {
+    "__type__": "cc.Node",
+    "_name": "AudioManager",
+    "_objFlags": 0,
+    "_parent": {
+      "__id__": 1
+    },
+    "_children": [],
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 19
+      }
+    ],
+    "_prefab": null,
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 0,
+      "height": 0
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_trs": {
+      "__type__": "TypedArray",
+      "ctor": "Float64Array",
+      "array": [
+        640,
+        360,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "_eulerAngles": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "_is3DNode": false,
+    "_groupIndex": 0,
+    "groupIndex": 0,
+    "_id": "65Nfvk2GpDp7bKigqG+hV9"
+  },
+  {
+    "__type__": "64ddaeBNo9KQJzZispPN3ga",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 18
+    },
+    "_enabled": true,
+    "bgm1": {
+      "__uuid__": "ee3e322e-220b-43b6-9395-f4a5b9c1414e"
+    },
+    "bgm2": {
+      "__uuid__": "6cc1183a-6bbf-403b-840a-806d9dc07e22"
+    },
+    "bgm3": {
+      "__uuid__": "70295544-5c1a-4604-9aa5-eb280f92d77c"
+    },
+    "sfxJump": {
+      "__uuid__": "e791a210-1c85-4bb4-a9a4-d68a4683a4ba"
+    },
+    "sfxStomp": {
+      "__uuid__": "42ead56d-ee1c-4ef3-a77d-bdec9320651a"
+    },
+    "sfxDie": {
+      "__uuid__": "4bef6a52-3480-440e-8e81-31b72c83dcb3"
+    },
+    "sfxGameOver": {
+      "__uuid__": "3ad39371-7cc5-472a-adb1-d69afb8ed807"
+    },
+    "sfxPowerUp": {
+      "__uuid__": "1e3da279-57e3-4867-beff-7bdba0782930"
+    },
+    "sfxPowerDown": {
+      "__uuid__": "9a294d84-4cad-404b-89b3-9424c3baf462"
+    },
+    "sfxPowerUpAppear": {
+      "__uuid__": "2e8d42d0-63c4-4d7f-a8d3-5fa558e3dd84"
+    },
+    "sfxLevelClear": {
+      "__uuid__": "95343801-179b-43ef-ba88-70cd46829d47"
+    },
+    "sfxKick": {
+      "__uuid__": "7ddd97be-9628-4db4-a44f-9c75e4411e0e"
+    },
+    "_id": "3au0u8N5VEQ4+mMLElehHj"
   }
 ]

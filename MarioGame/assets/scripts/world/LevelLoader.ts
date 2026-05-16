@@ -1,17 +1,38 @@
+import GameManager from '../managers/GameManager';
+
 const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class LevelLoader extends cc.Component {
 
+    @property(cc.TiledMapAsset)
+    level2Asset: cc.TiledMapAsset = null;
+
     @property(cc.Prefab)
     questionBlockPrefab: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    goombaPrefab: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    turtlePrefab: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    flagpolePrefab: cc.Prefab = null;
 
     onLoad() {
         const physics = cc.director.getPhysicsManager();
         physics.enabled = true;
         physics.gravity = cc.v2(0, -1200);
 
-        this.generateGroundColliders();
+        // Switch to level 2 map asset if needed
+        if (GameManager.currentLevel === 2 && this.level2Asset) {
+            this.getComponent(cc.TiledMap).tmxAsset = this.level2Asset;
+            // Wait one frame for TiledMap to reload before reading layers
+            this.scheduleOnce(() => this.generateGroundColliders(), 0.1);
+        } else {
+            this.generateGroundColliders();
+        }
     }
 
     private generateGroundColliders() {
@@ -46,7 +67,6 @@ export default class LevelLoader extends cc.Component {
         cc.log('[LevelLoader] Ground colliders + boundary walls + objects generated');
     }
 
-    // Read the Objects layer and spawn prefabs for known types
     private spawnObjects(numRows: number, tileSize: cc.Size) {
         const tiledMap = this.getComponent(cc.TiledMap);
         const group    = tiledMap.getObjectGroup('Objects');
@@ -58,32 +78,53 @@ export default class LevelLoader extends cc.Component {
         if (!world) { cc.warn('[LevelLoader] Canvas/World not found'); return; }
 
         for (const obj of objects) {
-            if (obj['name'] === 'question_block') {
-                if (!this.questionBlockPrefab) {
-                    cc.warn('[LevelLoader] questionBlockPrefab not assigned on Map node');
-                    continue;
-                }
+            try {
+                const type = obj['name'] as string;
                 const pos  = this.tiledToWorld(obj['x'], obj['y'], numRows, tileSize);
-                const node = cc.instantiate(this.questionBlockPrefab);
-                node.parent = world;
-                node.setPosition(pos.x, pos.y);
+                cc.log(`[LevelLoader] spawning "${type}" at (${pos.x.toFixed(1)}, ${pos.y.toFixed(1)})`);
+
+                switch (type) {
+                    case 'question_block':
+                        this.spawnPrefab(this.questionBlockPrefab, pos, world, 'questionBlockPrefab');
+                        break;
+
+                    case 'goomba':
+                        this.spawnPrefab(this.goombaPrefab, pos, world, 'goombaPrefab');
+                        break;
+
+                    case 'turtle':
+                        this.spawnPrefab(this.turtlePrefab, pos, world, 'turtlePrefab');
+                        break;
+
+                    case 'flagpole':
+                        this.spawnPrefab(this.flagpolePrefab, pos, world, 'flagpolePrefab');
+                        break;
+
+                    default:
+                        cc.warn(`[LevelLoader] unknown object name: "${type}"`);
+                }
+            } catch (e) {
+                cc.error('[LevelLoader] failed to spawn object:', e);
             }
-            // goomba / turtle / flagpole will be handled in later stages
         }
     }
 
-    // Convert object coords to world bottom-center of the tile.
-    // CC 2.4.x already flips obj['y'] to Y-up from map bottom, so we
-    // convert back to Tiled Y-down before the standard row calculation.
-    private tiledToWorld(ox: number, oy: number, numRows: number, tileSize: cc.Size): cc.Vec2 {
-        const col     = Math.floor(ox / tileSize.width);
-        const localXc = col * tileSize.width + tileSize.width / 2;
-        const tiledY  = numRows * tileSize.height - oy;   // undo CC's Y-flip
-        const row     = Math.floor(tiledY / tileSize.height);
-        const localY  = (numRows - 1 - row) * tileSize.height;
+    private spawnPrefab(prefab: cc.Prefab, pos: cc.Vec2, parent: cc.Node, label: string) {
+        if (!prefab) {
+            cc.warn(`[LevelLoader] ${label} not assigned on Map node`);
+            return;
+        }
+        const node = cc.instantiate(prefab);
+        node.parent = parent;
+        node.setPosition(pos.x, pos.y);
+    }
+
+    // CC 2.4.x getObjects() already returns obj['y'] in Y-up coords from map bottom.
+    // Use the coords directly; no row-snapping that would shift objects downward.
+    private tiledToWorld(ox: number, oy: number, _numRows: number, _tileSize: cc.Size): cc.Vec2 {
         return cc.v2(
-            localXc * this.node.scaleX + this.node.x,
-            localY  * this.node.scaleY + this.node.y,
+            ox * this.node.scaleX + this.node.x,
+            oy * this.node.scaleY + this.node.y,
         );
     }
 

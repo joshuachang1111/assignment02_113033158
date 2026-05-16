@@ -38,7 +38,7 @@ Mario 風格的橫向捲軸遊戲，共兩關。
 - [x] Level Design：問號磚（Objects layer Tiled Point → CC prefab 自動生成）
 - [x] Player：鍵盤控制、受傷/死亡/重生、大小狀態切換
 - [x] Enemies：Goomba — 走路動畫、碰牆轉向、踩頭擊殺/被側碰傷害玩家
-- [ ] Enemies：Turtle
+- [x] Enemies：Turtle — 走路動畫、完整 Shell 機制（踩踏→殼靜止→踢→殼滑行→自動復活）、邊緣偵測
 - [x] Question Blocks：超級蘑菇（頂到磚塊彈出蘑菇、觸碰蘑菇 Mario 變大）
 
 ### 動畫與音效
@@ -56,7 +56,7 @@ Mario 風格的橫向捲軸遊戲，共兩關。
 - [x] 關卡選擇（LevelSelect）：顯示當前命數、累積金幣、最高分數，STAGE 1 / STAGE 2 按鈕
 - [x] HUD：命數、分數（前綴 SCORE:）、計時器（前綴 TIME:，倒數至 0 玩家死亡）
 - [x] Game Over 畫面：每次死亡顯示，命歸零時出現 Return 按鈕回主選單
-- [ ] 過關畫面（LevelClear）：腳本已寫，尚未接旗竿觸發
+- [x] 過關畫面（LevelClear）：旗竿觸碰觸發，播放過關音效、計算時間獎分，4 秒後回 LevelSelect
 
 ### Firebase 功能（Bonus）
 

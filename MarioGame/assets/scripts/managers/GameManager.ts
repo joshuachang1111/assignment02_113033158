@@ -10,7 +10,9 @@ export default class GameManager {
     static coins:        number = 0;
 
     // GameOverUI registers this; Player calls loseLife() without importing GameOverUI
-    static onLoseLife: ((livesLeft: number) => void) | null = null;
+    static onLoseLife:   ((livesLeft: number) => void) | null = null;
+    // LevelClearUI registers this; Flagpole calls it without importing LevelClearUI
+    static onLevelClear: (() => void) | null = null;
 
     static startNewGame() {
         GameManager.lives = 3;

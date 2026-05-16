@@ -297,3 +297,37 @@ Claude 產出：
 修改說明：用 Y 軸世界座標閾值偵測掉落，不需要額外 collider 或 Editor 設定。
 
 ---
+
+--- 互動 14 ---
+使用者 prompt：Stage 9 — Turtle 敵人、旗竿、多關卡 LevelLoader、物件生成位置修正、邊緣偵測、Sprite Flip
+Claude 產出：
+- `scripts/enemies/Turtle.ts`（新增）
+  完整 Shell 機制（WALKING / SHELL_IDLE / SHELL_SLIDING 三狀態）、
+  走路動畫、玩家重疊檢測（stomp/kick/damage）、5 秒後自動復活、
+  shell 滑行時撞牆反彈並消滅其他敵人
+- `scripts/world/Flagpole.ts`（新增）
+  每幀 proximity 檢測，觸碰時呼叫 GameManager.onLevelClear
+- `scripts/ui/LevelClearUI.ts`（新增）
+  顯示過關畫面、停 BGM、播過關音效、計算時間獎分、4 秒後回 LevelSelect
+- `scripts/world/LevelLoader.ts`（修改）
+  新增 goombaPrefab / turtlePrefab / flagpolePrefab 欄位；
+  spawnObjects 改用 switch 統一處理各物件類型；
+  flagpole 改用 Prefab 方式（原 addComponent 會拋例外中斷 loop）；
+  tiledToWorld 簡化為直接使用 CC 已轉換的 Y-up 座標（移除多餘 floor 導致的偏移）；
+  整個 loop 加 try-catch 防止單一物件失敗中斷後續生成；
+  加 cc.log 方便除錯確認每個物件的座標
+- `scripts/enemies/EnemyBase.ts`（修改）
+  新增平台邊緣偵測（rayCast 往前下方投射，偵測 Static 地面消失時反向）；
+  新增 Sprite Flip（每幀根據 direction 更新 scaleX，預設面向左）；
+  新增 edgeDetectionEnabled 旗標供 Turtle shell 狀態停用邊緣偵測；
+  新增 edgeSensorOffset 屬性（可在 Inspector 調整）
+
+修改說明：
+  - flagpole 原本用 node.addComponent(Flagpole) 但沒有 import Flagpole，
+    執行時拋出 ReferenceError，導致 for loop 在第一個 flagpole 後中斷，
+    後續所有物件（第 2 個 goomba、第 2 個 turtle 等）全部未生成。
+    改用 flagpolePrefab 後 loop 正常完成。
+  - tiledToWorld 舊版將 CC Y-up 轉回 Tiled Y-down 再 floor 取 row，
+    產生最多一個 tile 高的往下偏移，新版直接使用 obj['y']（CC 已轉換）。
+  - Sprite Flip 公式：absScale * (direction < 0 ? 1 : -1)
+    因為 Turtle/Goomba sprite 預設面向左，往右走才需要 flip（scaleX 為負）。

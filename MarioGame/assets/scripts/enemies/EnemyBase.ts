@@ -7,14 +7,21 @@ export default class EnemyBase extends cc.Component {
     @property
     moveSpeed: number = 80;
 
-    // Map left edge (-640) + Goomba half-width (27) = -613; use -619 as safe default
     @property
     mapLeftBoundary: number = -613;
+
+    // How far ahead (px, world space) to probe for a missing floor
+    @property
+    edgeSensorOffset: number = 28;
 
     protected direction: number = -1;   // -1 = left, +1 = right
     protected rb: cc.RigidBody = null;
     protected col: cc.PhysicsBoxCollider = null;
     protected isDead: boolean = false;
+
+    // Subclasses can disable edge detection (e.g. Turtle shell states)
+    protected edgeDetectionEnabled: boolean = true;
+
     // Start > 0 so the frame-1 velocity (still 0) doesn't trigger stuck-detection
     private reverseCooldown: number = 0.15;
 
@@ -31,8 +38,10 @@ export default class EnemyBase extends cc.Component {
     update(dt: number) {
         if (this.isDead) return;
 
+        const worldPos = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+
         // Fell into a pit — destroy silently (no score)
-        if (this.node.convertToWorldSpaceAR(cc.Vec2.ZERO).y < -500) {
+        if (worldPos.y < -500) {
             this.node.destroy();
             return;
         }
@@ -40,10 +49,17 @@ export default class EnemyBase extends cc.Component {
         if (this.reverseCooldown > 0) this.reverseCooldown -= dt;
 
         // Left map boundary — reverse if past the edge
-        const worldX = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO).x;
-        if (worldX <= this.mapLeftBoundary && this.direction < 0 && this.reverseCooldown <= 0) {
+        if (worldPos.x <= this.mapLeftBoundary && this.direction < 0 && this.reverseCooldown <= 0) {
             this.direction = 1;
             this.reverseCooldown = 0.3;
+        }
+
+        // Platform edge detection (only when roughly on ground, vy ≈ 0)
+        if (this.edgeDetectionEnabled && this.reverseCooldown <= 0 && Math.abs(this.rb.linearVelocity.y) < 15) {
+            if (this.isAtEdge(worldPos)) {
+                this.direction *= -1;
+                this.reverseCooldown = 0.5;
+            }
         }
 
         // Velocity-stuck: only fire once per cooldown window so we don't oscillate
@@ -57,6 +73,10 @@ export default class EnemyBase extends cc.Component {
             this.direction * this.moveSpeed,
             this.rb.linearVelocity.y
         );
+
+        // Horizontal flip: sprite faces LEFT by default (scaleX > 0 = facing left)
+        const absScale = Math.abs(this.node.scaleX);
+        this.node.scaleX = absScale * (this.direction < 0 ? 1 : -1);
     }
 
     // Contact callback kept for pipe / raised-platform walls
@@ -83,5 +103,22 @@ export default class EnemyBase extends cc.Component {
         this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
         this.col.sensor = true;
         this.col.apply();
+    }
+
+    // ── edge detection ────────────────────────────────────────────────────────
+
+    // Cast a ray downward from just ahead of the enemy's front foot.
+    // Returns true if no static ground is found below (= we are at an edge).
+    private isAtEdge(worldPos: cc.Vec2): boolean {
+        const sensorX = worldPos.x + this.direction * this.edgeSensorOffset;
+        const start   = cc.v2(sensorX, worldPos.y + 5);
+        const end     = cc.v2(sensorX, worldPos.y - 60);
+        const pm      = cc.director.getPhysicsManager();
+        const results = pm.rayCast(start, end, cc.RayCastType.Any);
+        return !results.some(r => {
+            if (r.collider.node === this.node) return false;
+            const rb = r.collider.node.getComponent(cc.RigidBody);
+            return rb && rb.type === cc.RigidBodyType.Static;
+        });
     }
 }
