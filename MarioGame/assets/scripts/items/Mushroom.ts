@@ -126,8 +126,12 @@ export default class Mushroom extends cc.Component {
 
         if (dx > this.OVERLAP_X || dy > overlapY) return;
 
-        AudioManager.playSFX(AudioManager.I?.sfxPowerUp);
-        this.player.growBig();
+        if (this.player.playerState === PlayerState.BIG) {
+            AudioManager.playSFX(AudioManager.I?.sfxCoin);
+        } else {
+            AudioManager.playSFX(AudioManager.I?.sfxPowerUp);
+            this.player.growBig();
+        }
         this.node.destroy();
     }
 }

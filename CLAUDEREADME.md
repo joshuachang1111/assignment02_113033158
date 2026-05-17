@@ -227,10 +227,23 @@ DEAD + lives == 0 ──→ GameOver
 | 6 | 傷害/死亡/重生 + GameManager 全域狀態 | ✅ 完成 |
 | 7 | UI（HUD + 所有選單場景）| ✅ 完成 |
 | 8 | 動畫（Sprite Animation）+ 音效 | ✅ 完成（音效；動畫已在 Stage 3~5 完成）|
-| 9 | Level 2 關卡設計 + Turtle 敵人 | 🔄 進行中（Turtle 完成、Level 2 地圖待設計）|
+| 9 | Level 2 關卡設計 + Turtle 敵人 | 🔄 進行中（Turtle 完成、bug 修正完成、Level 2 地圖待設計）|
 | 10 | Firebase 整合（登入、存檔、排行榜）| |
 | 11 | Firebase Hosting 部署 | |
 | 12 | 測試、Bug 修正、Appearance 調整 | |
+
+---
+
+## 已修正的 Bug（Stage 9 後期）
+
+- **Player.ts die() crash**：`this.groundContacts = 0` 為未宣告變數，已刪除
+- **Player.ts 排程殘留**：onDestroy 補上 `this.unscheduleAllCallbacks()`
+- **GameManager callbacks 殘留**：startNewGame() 補上 `onLoseLife = null; onLevelClear = null;`
+- **QuestionBlock vy 閾值**：從 `< 100` 改為 `< 0`，允許慢速跳躍觸發
+- **EnemyBase isDead 存取**：新增 `get dead()` getter，Turtle 改用 `enemy.dead`
+- **Mushroom 音效**：BIG 狀態吃蘑菇改播 sfxCoin，不再觸發 growBig
+- **Turtle/Goomba 踩頭誤判**：`isStomp` 從純位置改為 `pPos.y > stompLine && playerVy <= 100`
+  （向上跳撞側面 vy > 100 → 判傷害；落地/下墜 vy ≤ 100 → 判踩頭）
 
 ---
 

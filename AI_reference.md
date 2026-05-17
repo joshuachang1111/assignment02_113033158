@@ -362,3 +362,42 @@ Claude 產出：
   - 蘑菇：onPreSolve 禁用衝力但 onBeginContact 仍觸發，雙邊都需過濾才能完全不互動。
   - 終點死亡：LevelClearUI 設 timer=0 → HUD 下幀判定 timer≤0 → die()，
     加 levelCleared 旗標後 HUD 不再倒數也不觸發死亡。
+
+---
+
+--- 互動 16 ---
+使用者 prompt：程式碼全面 bug 審查 + 修正、蘑菇吃到時音效邏輯、踩頭偵測精確修正
+Claude 產出：
+- `scripts/player/Player.ts`（修改）
+  移除 die() 中未宣告的 this.groundContacts = 0（會在每次死亡時 crash）；
+  onDestroy 加入 this.unscheduleAllCallbacks()（防止場景重載後排程殘留）
+- `scripts/managers/GameManager.ts`（修改）
+  startNewGame() 補上 onLoseLife = null; onLevelClear = null;
+  避免跨場景時舊 UI 的回呼仍掛在靜態變數上
+- `scripts/items/QuestionBlock.ts`（修改）
+  vy 閾值從 < 100 改為 < 0，允許任何向上動作都能觸發問號磚
+  （gap 位置判斷已能防止從上方誤觸發）
+- `scripts/enemies/EnemyBase.ts`（修改）
+  新增 get dead() 公開 getter，供 Turtle 不用 bracket notation 存取 isDead
+- `scripts/enemies/Turtle.ts`（修改）
+  enemy['isDead'] 全部改為 enemy.dead（透過公開 getter 存取）
+- `scripts/managers/AudioManager.ts`（修改）
+  新增 sfxCoin: cc.AudioClip 欄位
+- `scripts/items/Mushroom.ts`（修改）
+  若玩家已是 BIG 狀態吃到蘑菇，改播 sfxCoin（不再觸發 growBig）；
+  若是 SMALL 狀態，照常播 sfxPowerUp 並呼叫 growBig()
+- `scripts/enemies/Turtle.ts`（修改）
+  checkPlayerOverlap 的 isStomp 判斷：
+  舊版移除 velocity check 後造成跳躍側撞被誤判為踩頭；
+  改為 pPos.y > stompLine && playerVy <= 100，
+  允許落地後 vy ≈ 0 的真實踩頭，同時擋掉 vy > 100 的向上跳側撞
+- `scripts/enemies/Goomba.ts`（修改）
+  同上，stompLine 從 myPos.y+50 降至 myPos.y+36，
+  playerVy 從 < -10 改為 <= 100
+
+修改說明：
+  - groundContacts：Player 沒有 contact count 機制（改用 velocity-based isGrounded），
+    die() 裡這行是殘留程式碼，直接刪除。
+  - 踩頭 isStomp 邏輯：物理落地後 vy 會被瞬間設為 0，原本 playerVy < -1 因此漏判；
+    完全移除 vy check 後，向上跳撞到龜身上半部 pPos.y > stompLine 被誤判為踩頭；
+    最終方案 playerVy <= 100：跳躍中速度遠高於 100，落地後速度接近 0，兩者能正確區分。

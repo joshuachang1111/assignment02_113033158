@@ -22,6 +22,8 @@ export default class GameManager {
         GameManager.score = 0;
         GameManager.timer = 300;
         GameManager.levelCleared = false;
+        GameManager.onLoseLife   = null;
+        GameManager.onLevelClear = null;
         // highScore and coins intentionally not reset
     }
 

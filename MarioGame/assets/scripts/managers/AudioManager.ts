@@ -18,6 +18,7 @@ export default class AudioManager extends cc.Component {
     @property(cc.AudioClip) sfxPowerUpAppear:  cc.AudioClip = null;
     @property(cc.AudioClip) sfxLevelClear:     cc.AudioClip = null;
     @property(cc.AudioClip) sfxKick:           cc.AudioClip = null;
+    @property(cc.AudioClip) sfxCoin:           cc.AudioClip = null;
 
     private bgmId:   number = -1;
     private bgmClip: cc.AudioClip = null;

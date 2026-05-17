@@ -74,7 +74,7 @@ export default class QuestionBlock extends cc.Component {
         if (this.player.playerState === PlayerState.DEAD) return;
 
         const vy = this.player.rigidbody.linearVelocity.y;
-        if (vy < 100) return;   // must be jumping upward
+        if (vy < 0) return;   // must be moving upward
 
         const myWorld = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);   // block bottom-center
         const pWorld  = this.player.node.convertToWorldSpaceAR(cc.Vec2.ZERO); // player bottom-center

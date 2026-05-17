@@ -109,7 +109,7 @@ export default class Turtle extends EnemyBase {
         if (this.turtleState === TurtleState.SHELL_SLIDING) {
             // Kill enemy on contact
             const enemy = other.node.getComponent(EnemyBase);
-            if (enemy && !enemy['isDead'] && other.node !== this.node) {
+            if (enemy && !enemy.dead && other.node !== this.node) {
                 GameManager.addScore(100);
                 AudioManager.playSFX(AudioManager.I?.sfxStomp);
                 other.node.destroy();
@@ -192,8 +192,8 @@ export default class Turtle extends EnemyBase {
         if (dx > this.OVERLAP_X + 8 || dy > this.OVERLAP_Y + 8) return;
 
         const playerVy  = this.player.rigidbody.linearVelocity.y;
-        const stompLine = myPos.y + (this.turtleState === TurtleState.SHELL_IDLE ? 20 : 45);
-        const isStomp   = playerVy < -1 && pPos.y > stompLine;
+        const stompLine = myPos.y + (this.turtleState === TurtleState.SHELL_IDLE ? 20 : 36);
+        const isStomp   = pPos.y > stompLine && playerVy <= 100;
 
         switch (this.turtleState) {
             case TurtleState.WALKING:
@@ -263,7 +263,7 @@ export default class Turtle extends EnemyBase {
         for (const child of world.children) {
             if (child === this.node) continue;
             const enemy = child.getComponent(EnemyBase);
-            if (!enemy || enemy['isDead']) continue;
+            if (!enemy || enemy.dead) continue;
 
             const ePos = child.convertToWorldSpaceAR(cc.Vec2.ZERO);
             if (Math.abs(myPos.x - ePos.x) < 52 && Math.abs(myPos.y - ePos.y) < 80) {

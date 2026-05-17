@@ -76,6 +76,7 @@ export default class Player extends cc.Component {
     onDestroy() {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP,   this.onKeyUp,   this);
+        this.unscheduleAllCallbacks();
     }
 
     private onKeyDown(e: cc.Event.EventKeyboard) { this.keys[e.keyCode] = true;  }
@@ -200,7 +201,6 @@ export default class Player extends cc.Component {
     die() {
         if (this.playerState === PlayerState.DEAD) return;
         this.playerState = PlayerState.DEAD;
-        this.groundContacts = 0;
         AudioManager.stopBGM();
         AudioManager.playSFX(AudioManager.I?.sfxDie);
         // make sensor so player passes through level geometry during death arc

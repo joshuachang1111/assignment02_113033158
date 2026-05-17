@@ -18,6 +18,7 @@ export default class EnemyBase extends cc.Component {
     protected rb: cc.RigidBody = null;
     protected col: cc.PhysicsBoxCollider = null;
     protected isDead: boolean = false;
+    get dead(): boolean { return this.isDead; }
 
     // Subclasses can disable edge detection (e.g. Turtle shell states)
     protected edgeDetectionEnabled: boolean = true;
