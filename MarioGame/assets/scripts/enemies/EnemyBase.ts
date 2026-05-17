@@ -79,13 +79,26 @@ export default class EnemyBase extends cc.Component {
         this.node.scaleX = absScale * (this.direction < 0 ? 1 : -1);
     }
 
+    // Mushroom should pass through enemies — disable physical impulse from both sides
+    onPreSolve(
+        contact: cc.PhysicsContact,
+        _self: cc.PhysicsCollider,
+        other: cc.PhysicsCollider
+    ) {
+        if (other.node.getComponent('Mushroom')) {
+            contact.disabled = true;
+        }
+    }
+
     // Contact callback kept for pipe / raised-platform walls
     onBeginContact(
         contact: cc.PhysicsContact,
         _self: cc.PhysicsCollider,
-        _other: cc.PhysicsCollider
+        other: cc.PhysicsCollider
     ) {
         if (this.isDead) return;
+        // Ignore mushroom contacts — mushroom passes through enemies
+        if (other.node.getComponent('Mushroom')) return;
         if (this.reverseCooldown > 0) return;
         try {
             const normal = contact.getWorldManifold().normal;

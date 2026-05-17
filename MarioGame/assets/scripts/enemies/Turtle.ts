@@ -28,6 +28,12 @@ export default class Turtle extends EnemyBase {
     private readonly SLIDE_SPEED    = 350;
     private readonly SHELL_IDLE_TIME = 5.0;
 
+    // Collider dimensions (local units; prefab scale = 3 → multiply by 3 for world)
+    private readonly WALK_COL_H  = 24;
+    private readonly WALK_COL_OY = 12;
+    private readonly SHELL_COL_H  = 14;
+    private readonly SHELL_COL_OY = 7;
+
     // Turtle ~16×24 px × scale3 = 48×72 world, anchor bottom-center
     private readonly OVERLAP_X = 24 + 21;
     private readonly OVERLAP_Y = 36 + 24;
@@ -74,13 +80,22 @@ export default class Turtle extends EnemyBase {
                 if (this.shellIdleTimer <= 0) this.revive();
                 break;
 
-            case TurtleState.SHELL_SLIDING:
+            case TurtleState.SHELL_SLIDING: {
+                // velocity-stuck fallback: if shell got blocked and vx collapsed, reverse
+                const vx = this.rb.linearVelocity.x;
+                if (Math.abs(vx) < 30 && this.hitCooldown <= 0) {
+                    this.direction *= -1;
+                    this.hitCooldown = 0.2;
+                }
                 this.rb.linearVelocity = cc.v2(
                     this.direction * this.SLIDE_SPEED,
                     this.rb.linearVelocity.y
                 );
+                // Enemies don't physically collide with each other, so use proximity scan
+                this.checkEnemyKill();
                 this.checkPlayerOverlap();
                 break;
+            }
         }
     }
 
@@ -89,6 +104,8 @@ export default class Turtle extends EnemyBase {
         self: cc.PhysicsCollider,
         other: cc.PhysicsCollider
     ) {
+        if (this.isDead) return;
+
         if (this.turtleState === TurtleState.SHELL_SLIDING) {
             // Kill enemy on contact
             const enemy = other.node.getComponent(EnemyBase);
@@ -98,12 +115,27 @@ export default class Turtle extends EnemyBase {
                 other.node.destroy();
                 return;
             }
-            // Wall reversal
+            // Wall reversal via contact normal (velocity-stuck in update() is backup)
             try {
                 const normal = contact.getWorldManifold().normal;
-                if (Math.abs(normal.x) > 0.7) this.direction *= -1;
+                if (Math.abs(normal.x) >= 0.6) this.direction *= -1;
             } catch (_e) {}
             return;
+        }
+
+        // Stomp detection at contact moment — position-only check is reliable here
+        // because physics contact only fires when the bodies are actually touching.
+        // A player above myWorldY + threshold AND in contact must be landing from above.
+        const playerComp = other.node.getComponent(Player);
+        if (playerComp && this.hitCooldown <= 0 && playerComp.playerState !== PlayerState.DEAD) {
+            const myWorldY = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO).y;
+            const pWorldY  = playerComp.node.convertToWorldSpaceAR(cc.Vec2.ZERO).y;
+            const stompThreshold = this.turtleState === TurtleState.SHELL_IDLE ? 15 : 40;
+
+            if (pWorldY > myWorldY + stompThreshold) {
+                this.handleStomp(playerComp);
+                return;
+            }
         }
 
         if (this.turtleState === TurtleState.WALKING) {
@@ -112,6 +144,37 @@ export default class Turtle extends EnemyBase {
     }
 
     // ── private helpers ───────────────────────────────────────────────────────
+
+    private handleStomp(playerComp: Player) {
+        switch (this.turtleState) {
+            case TurtleState.WALKING:
+                this.enterShell();
+                playerComp.stomp();
+                GameManager.addScore(100);
+                AudioManager.playSFX(AudioManager.I?.sfxStomp);
+                this.hitCooldown = 0.3;
+                break;
+
+            case TurtleState.SHELL_SLIDING:
+                // Stomp on sliding shell → stop it (back to idle)
+                this.enterShell();
+                playerComp.stomp();
+                GameManager.addScore(100);
+                AudioManager.playSFX(AudioManager.I?.sfxStomp);
+                this.hitCooldown = 0.3;
+                break;
+
+            case TurtleState.SHELL_IDLE:
+                // Stomp on idle shell → completely destroy
+                playerComp.stomp();
+                GameManager.addScore(100);
+                AudioManager.playSFX(AudioManager.I?.sfxStomp);
+                this.die();
+                this.scheduleOnce(() => this.node.destroy(), 0.3);
+                this.hitCooldown = 0.3;
+                break;
+        }
+    }
 
     private checkPlayerOverlap() {
         if (!this.player || this.hitCooldown > 0) return;
@@ -129,16 +192,13 @@ export default class Turtle extends EnemyBase {
         if (dx > this.OVERLAP_X + 8 || dy > this.OVERLAP_Y + 8) return;
 
         const playerVy  = this.player.rigidbody.linearVelocity.y;
-        const stompLine = myPos.y + (this.turtleState === TurtleState.SHELL_IDLE ? 20 : 50);
-        const isStomp   = playerVy < -10 && pPos.y > stompLine;
+        const stompLine = myPos.y + (this.turtleState === TurtleState.SHELL_IDLE ? 20 : 45);
+        const isStomp   = playerVy < -1 && pPos.y > stompLine;
 
         switch (this.turtleState) {
             case TurtleState.WALKING:
                 if (isStomp) {
-                    this.enterShell();
-                    this.player.stomp();
-                    GameManager.addScore(100);
-                    AudioManager.playSFX(AudioManager.I?.sfxStomp);
+                    this.handleStomp(this.player);
                 } else {
                     this.player.takeDamage();
                     this.hitCooldown = 0.5;
@@ -147,9 +207,7 @@ export default class Turtle extends EnemyBase {
 
             case TurtleState.SHELL_IDLE:
                 if (isStomp) {
-                    // Stomp on idle shell — player bounces, shell stays
-                    this.player.stomp();
-                    this.hitCooldown = 0.3;
+                    this.handleStomp(this.player);
                 } else {
                     // Kick shell
                     this.direction = pCenter.x < myCenter.x ? 1 : -1;
@@ -161,10 +219,7 @@ export default class Turtle extends EnemyBase {
 
             case TurtleState.SHELL_SLIDING:
                 if (isStomp) {
-                    // Stop sliding shell
-                    this.enterShell();
-                    this.player.stomp();
-                    this.hitCooldown = 0.5;
+                    this.handleStomp(this.player);
                 } else {
                     this.player.takeDamage();
                     this.hitCooldown = 0.5;
@@ -178,13 +233,45 @@ export default class Turtle extends EnemyBase {
         this.shellIdleTimer       = this.SHELL_IDLE_TIME;
         this.edgeDetectionEnabled = false;
         this.rb.linearVelocity    = cc.v2(0, this.rb.linearVelocity.y);
+
+        // Shrink collider to shell size
+        this.col.size   = cc.size(this.col.size.width, this.SHELL_COL_H);
+        this.col.offset = cc.v2(0, this.SHELL_COL_OY);
+        this.col.apply();
+
         this.setFrame(this.SHELL_FRAME);
     }
 
     private revive() {
         this.turtleState          = TurtleState.WALKING;
         this.edgeDetectionEnabled = true;
+
+        // Restore walk collider
+        this.col.size   = cc.size(this.col.size.width, this.WALK_COL_H);
+        this.col.offset = cc.v2(0, this.WALK_COL_OY);
+        this.col.apply();
+
         this.setFrame(this.WALK_FRAMES[0]);
+    }
+
+    // Proximity-based enemy kill for sliding shell (enemies don't physically collide)
+    private checkEnemyKill() {
+        const world = cc.find('Canvas/World');
+        if (!world) return;
+        const myPos = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+
+        for (const child of world.children) {
+            if (child === this.node) continue;
+            const enemy = child.getComponent(EnemyBase);
+            if (!enemy || enemy['isDead']) continue;
+
+            const ePos = child.convertToWorldSpaceAR(cc.Vec2.ZERO);
+            if (Math.abs(myPos.x - ePos.x) < 52 && Math.abs(myPos.y - ePos.y) < 80) {
+                GameManager.addScore(100);
+                AudioManager.playSFX(AudioManager.I?.sfxStomp);
+                child.destroy();
+            }
+        }
     }
 
     private updateWalkAnim(dt: number) {

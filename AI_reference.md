@@ -331,3 +331,34 @@ Claude 產出：
     產生最多一個 tile 高的往下偏移，新版直接使用 obj['y']（CC 已轉換）。
   - Sprite Flip 公式：absScale * (direction < 0 ? 1 : -1)
     因為 Turtle/Goomba sprite 預設面向左，往右走才需要 flip（scaleX 為負）。
+
+--- 互動 15 ---
+使用者 prompt：修正 Turtle 踩頭偵測、龜殼打敵人、蘑菇碰撞、終點死亡效果
+Claude 產出：
+- `scripts/enemies/Turtle.ts`（修改）
+  onBeginContact stomp 改為純位置判斷（移除 velocity 閾值，有物理接觸且玩家在頭頂即為 stomp）；
+  新增 checkEnemyKill() proximity 掃描（敵人互相穿透不觸發 onBeginContact，改每幀掃描 World 子節點）；
+  handleStomp SHELL_SLIDING 改為 enterShell（停止）而非死亡；
+  SHELL_IDLE 踩踏才徹底死亡；
+  playerVy 閾值全部降至 -1
+- `scripts/enemies/EnemyBase.ts`（修改）
+  新增 onPreSolve：碰到 Mushroom 時 contact.disabled = true（禁用物理衝力）；
+  onBeginContact 過濾 Mushroom 接觸（不轉向）
+- `scripts/items/Mushroom.ts`（修改）
+  onBeginContact 過濾 EnemyBase 接觸（蘑菇不因碰敵人而轉向）；
+  onPreSolve 已有（禁用物理衝力）
+- `scripts/managers/GameManager.ts`（修改）
+  新增 levelCleared: boolean 旗標，startNewGame 時重置
+- `scripts/ui/HUD.ts`（修改）
+  timer 倒數與死亡邏輯加 !GameManager.levelCleared 條件
+- `scripts/ui/LevelClearUI.ts`（修改）
+  show() 開頭設 GameManager.levelCleared = true，防止過關後 timer 觸發死亡
+
+修改說明：
+  - 踩頭：onBeginContact 在物理接觸瞬間 velocity 可能已被 physics 修改（Box2D
+    在某些情況下先解算再通知），純位置判斷更可靠。
+  - 殼打敵人：CC 2.4.x 敵人互相不物理碰撞（設計上穿透），onBeginContact 不觸發，
+    改用每幀距離掃描，dx<52 且 dy<80 即殺死。
+  - 蘑菇：onPreSolve 禁用衝力但 onBeginContact 仍觸發，雙邊都需過濾才能完全不互動。
+  - 終點死亡：LevelClearUI 設 timer=0 → HUD 下幀判定 timer≤0 → die()，
+    加 levelCleared 旗標後 HUD 不再倒數也不觸發死亡。

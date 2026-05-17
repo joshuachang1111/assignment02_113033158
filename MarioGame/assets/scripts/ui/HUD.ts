@@ -30,7 +30,7 @@ export default class HUD extends cc.Component {
     }
 
     update(dt: number) {
-        if (this.player && this.player.playerState !== PlayerState.DEAD) {
+        if (this.player && this.player.playerState !== PlayerState.DEAD && !GameManager.levelCleared) {
             GameManager.timer -= dt;
             if (GameManager.timer <= 0) {
                 GameManager.timer = 0;

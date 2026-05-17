@@ -1,6 +1,7 @@
 import Player from '../player/Player';
 import { PlayerState } from '../player/PlayerState';
 import AudioManager from '../managers/AudioManager';
+import EnemyBase from '../enemies/EnemyBase';
 
 const { ccclass, property } = cc._decorator;
 
@@ -78,12 +79,25 @@ export default class Mushroom extends cc.Component {
         this.checkPlayerOverlap();
     }
 
+    // Disable physical collision with enemies so mushroom passes through them
+    onPreSolve(
+        contact: cc.PhysicsContact,
+        _self: cc.PhysicsCollider,
+        other: cc.PhysicsCollider
+    ) {
+        if (other.node.getComponent(EnemyBase)) {
+            contact.disabled = true;
+        }
+    }
+
     // Contact callback for wall reversal (same as EnemyBase)
     onBeginContact(
         contact: cc.PhysicsContact,
         _self: cc.PhysicsCollider,
-        _other: cc.PhysicsCollider
+        other: cc.PhysicsCollider
     ) {
+        // Enemies pass through mushroom — don't change direction on enemy contact
+        if (other.node.getComponent(EnemyBase)) return;
         if (this.emergeTimer > 0 || this.reverseCooldown > 0) return;
         try {
             const normal = contact.getWorldManifold().normal;

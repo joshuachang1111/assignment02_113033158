@@ -9,6 +9,9 @@ export default class GameManager {
     static highScore:    number = 0;
     static coins:        number = 0;
 
+    // Set to true by LevelClearUI to freeze the timer and prevent timer-based death
+    static levelCleared: boolean = false;
+
     // GameOverUI registers this; Player calls loseLife() without importing GameOverUI
     static onLoseLife:   ((livesLeft: number) => void) | null = null;
     // LevelClearUI registers this; Flagpole calls it without importing LevelClearUI
@@ -18,6 +21,7 @@ export default class GameManager {
         GameManager.lives = 3;
         GameManager.score = 0;
         GameManager.timer = 300;
+        GameManager.levelCleared = false;
         // highScore and coins intentionally not reset
     }
 

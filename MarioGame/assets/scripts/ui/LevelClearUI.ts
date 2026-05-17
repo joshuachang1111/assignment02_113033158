@@ -18,6 +18,7 @@ export default class LevelClearUI extends cc.Component {
     show() {
         if (this.node.active) return;
         this.node.active = true;
+        GameManager.levelCleared = true;
         AudioManager.stopBGM();
         AudioManager.playSFX(AudioManager.I?.sfxLevelClear);
         GameManager.addScore(Math.ceil(GameManager.timer) * 30);
