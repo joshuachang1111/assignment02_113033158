@@ -51,6 +51,7 @@ export default class FirebaseManager {
 
     /** 註冊新帳號，回傳錯誤訊息（成功回傳 null）*/
     static async signUp(email: string, password: string, name: string): Promise<string | null> {
+        if (!this.isReady) return '服務載入中，請稍後再試';
         try {
             const fb   = (window as any).firebase;
             const cred = await fb.auth().createUserWithEmailAndPassword(email, password);
@@ -62,17 +63,20 @@ export default class FirebaseManager {
             });
             return null;
         } catch (e: any) {
-            return this.friendlyError(e.code);
+            cc.error('[Firebase] signUp error:', e);
+            return this.friendlyError(e?.code);
         }
     }
 
     /** 登入，回傳錯誤訊息（成功回傳 null）*/
     static async signIn(email: string, password: string): Promise<string | null> {
+        if (!this.isReady) return '服務載入中，請稍後再試';
         try {
             await (window as any).firebase.auth().signInWithEmailAndPassword(email, password);
             return null;
         } catch (e: any) {
-            return this.friendlyError(e.code);
+            cc.error('[Firebase] signIn error:', e);
+            return this.friendlyError(e?.code);
         }
     }
 
@@ -169,7 +173,8 @@ export default class FirebaseManager {
         });
     }
 
-    private static friendlyError(code: string): string {
+    private static friendlyError(code: string | undefined): string {
+        if (!code) return '發生未知錯誤，請重試';
         const map: { [k: string]: string } = {
             'auth/email-already-in-use':  '此 Email 已被使用',
             'auth/invalid-email':         'Email 格式錯誤',

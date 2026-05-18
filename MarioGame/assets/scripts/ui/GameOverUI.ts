@@ -35,6 +35,6 @@ export default class GameOverUI extends cc.Component {
 
     onReturnClicked() {
         GameManager.startNewGame();
-        cc.director.loadScene('MainMenu');
+        cc.director.loadScene('LevelSelect');
     }
 }

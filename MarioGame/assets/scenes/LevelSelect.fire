@@ -2176,6 +2176,10 @@
     "coinsLabel": {
       "__id__": 13
     },
+    "bestScoreLabel": null,
+    "userLabel": {
+      "__id__": 9
+    },
     "_id": "afn6h7TfZMy7sRLFifydHc"
   }
 ]

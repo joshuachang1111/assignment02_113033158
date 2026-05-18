@@ -444,18 +444,36 @@ Claude 產出：
     改為踢出時直接設速度。
   - Goomba BIG Mario：pCenter 高度寫死 24，BIG Mario 中心在 39，
     導致 dy 偏大而漏掉某些碰撞判斷。
-使用者 prompt：Mario 出生點改由 Tiled Objects 層的 player 物件決定
+
+---
+
+--- 互動 19 ---
+使用者 prompt：Firebase 登入流程 bug 修正、UI 改善、Game Over 後維持登入狀態
 Claude 產出：
-- `scripts/player/Player.ts`（修改）
-  新增 setSpawnPos(worldPos) 公開方法：同時設定 node 位置與 this.spawnPos
-- `scripts/world/LevelLoader.ts`（修改）
-  import Player；spawnObjects switch 新增 'player' case：
-  找到 Canvas/World/Player 節點，呼叫 playerComp.setSpawnPos(pos)
-  若地圖沒放 player 物件，保留 editor 預設位置（不報錯）
-- `resources/tilemaps/level2.tmx`（新增）
-  Level 2 地圖（由使用者在 Tiled 設計）
+- `scripts/managers/FirebaseManager.ts`（修改）
+  signUp / signIn 加入 isReady 前置檢查，未就緒回傳「服務載入中，請稍後再試」；
+  catch block 改用 e?.code（optional chaining），防止 e.code 為 undefined 時顯示「發生錯誤：undefined」；
+  friendlyError 參數型別改為 string | undefined，加 !code 早期回傳「發生未知錯誤，請重試」；
+  各 try/catch 加入 cc.error 方便 Console 除錯
+- `scripts/ui/MainMenuUI.ts`（修改）
+  onAuthChanged：登入成功時先顯示「歡迎，{displayName}！」，延遲 0.5s 再跳 LevelSelect；
+  未登入時維持「請登入後開始遊戲」
+- `scripts/ui/LevelSelectUI.ts`（修改）
+  新增 userLabel: cc.Label @property；
+  start() 讀取 FirebaseManager.currentUser.displayName 並顯示「USER: {name}」
+- `scripts/ui/GameOverUI.ts`（修改）
+  onReturnClicked 從 loadScene('MainMenu') 改為 loadScene('LevelSelect')；
+  Game Over 後維持 Firebase 登入狀態，不走重新登入流程
+- EditBox Max Length（Editor 設定）
+  EmailInput / PasswordInput / NameInput 的 Max Length 從預設 20 改為 100
 
 修改說明：
-  scene reload 時 LevelLoader 重新跑 spawnObjects，player 物件被偵測到後
-  立即移動 Player 節點並更新 spawnPos，確保每次重生都回到 Tiled 設定的位置。
-  若 Tiled 沒有放 player 物件則 fallback 到 editor 初始位置。
+  - auth/internal-error / undefined：Firebase SDK 拋出的 Error 物件有時不含 .code 屬性
+    （特別是 firebase 尚未 init 完成時直接呼叫 signIn，fb 為 undefined，
+    呼叫 fb.auth() 直接 TypeError，e.code 為 undefined）。
+    解法：isReady 前置檢查 + optional chaining + friendlyError 防 undefined。
+  - Game Over 流程：原本跳回 MainMenu 需重新觸發 onAuthStateChanged，
+    直接跳 LevelSelect 最可靠，Firebase auth state 跨場景持久存在。
+  - Email Enumeration Protection：新版 Firebase 專案預設開啟，
+    會把 user-not-found / wrong-password 包裝成 internal-error。
+    建議在 Firebase Console → Authentication → Settings 關閉此設定。

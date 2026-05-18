@@ -228,9 +228,31 @@ DEAD + lives == 0 ──→ GameOver
 | 7 | UI（HUD + 所有選單場景）| ✅ 完成 |
 | 8 | 動畫（Sprite Animation）+ 音效 | ✅ 完成（音效；動畫已在 Stage 3~5 完成）|
 | 9 | Level 2 關卡設計 + Turtle 敵人 | ✅ 完成（Turtle、Level 2 地圖、spawn point by Tiled）|
-| 10 | Firebase 整合（登入、存檔、排行榜）| |
+| 10 | Firebase 整合（登入、存檔、排行榜）| 🔄 進行中（Auth + Firestore 完成，排行榜 UI 待做）|
 | 11 | Firebase Hosting 部署 | |
 | 12 | 測試、Bug 修正、Appearance 調整 | |
+
+---
+
+## Stage 10 Firebase 整合進度
+
+| 功能 | 狀態 |
+|------|------|
+| FirebaseManager（動態載入 SDK、init）| ✅ 完成 |
+| Email/Password 註冊（signUp）| ✅ 完成 |
+| Email/Password 登入（signIn）| ✅ 完成 |
+| onAuthStateChanged 自動跳轉 LevelSelect | ✅ 完成 |
+| 登入後 MainMenu 顯示「歡迎，{name}」| ✅ 完成 |
+| LevelSelect 顯示「USER: {name}」| ✅ 完成 |
+| 過關上傳分數（uploadScore）| ✅ 完成 |
+| LevelSelect 顯示個人最佳分數（getBestScore）| ✅ 完成 |
+| Game Over 後跳 LevelSelect（維持登入）| ✅ 完成 |
+| 排行榜 UI（LeaderboardUI）| ❌ 待做 |
+| Logout 按鈕（LevelSelect）| ❌ 待做 |
+
+**注意事項：**
+- Firebase Console → Authentication → Settings → **關閉 Email Enumeration Protection**，否則錯誤訊息會是 internal-error
+- EmailInput / PasswordInput / NameInput 的 **Max Length** 需在 Editor 設為 100
 
 ---
 
