@@ -420,3 +420,42 @@ Claude 產出：
   scene reload 時 LevelLoader 重新跑 spawnObjects，player 物件被偵測到後
   立即移動 Player 節點並更新 spawnPos，確保每次重生都回到 Tiled 設定的位置。
   若 Tiled 沒有放 player 物件則 fallback 到 editor 初始位置。
+
+---
+
+--- 互動 18 ---
+使用者 prompt：全面 bug 審查（重點 Turtle），修正發現的問題
+Claude 產出：
+- `scripts/enemies/Turtle.ts`（修改）
+  checkPlayerOverlap：myCenter/myHalfH 改為狀態感知
+  （WALKING=36 world, SHELL=21 world = SHELL_COL_OY×3）；
+  dy 判斷改為動態 myHalfH + playerHalfH + 8；
+  SHELL_IDLE kick：踢出時立即設定 rb.linearVelocity，不等下一幀 update
+- `scripts/enemies/Goomba.ts`（修改）
+  checkPlayerOverlap：playerHalfH 從寫死 24 改為動態
+  （BIG=39, SMALL=24），修正 BIG Mario 踩 Goomba 時重疊中心偏移
+
+修改說明：
+  - Turtle shell 中心高度：shell collider height=14 local × scale3 = 42 world，
+    offset=7 local × scale3 = 21 world → shell 中心在 myPos.y + 21，
+    原本寫死 36 會讓 SHELL 模式的 dy 超出閾值而漏偵測。
+  - kick 速度延遲：設定 direction 後要等下一幀 SHELL_SLIDING update 才套速度，
+    若玩家剛好靠著牆踢，第一幀 vx=0 → velocity-stuck fallback 可能反向。
+    改為踢出時直接設速度。
+  - Goomba BIG Mario：pCenter 高度寫死 24，BIG Mario 中心在 39，
+    導致 dy 偏大而漏掉某些碰撞判斷。
+使用者 prompt：Mario 出生點改由 Tiled Objects 層的 player 物件決定
+Claude 產出：
+- `scripts/player/Player.ts`（修改）
+  新增 setSpawnPos(worldPos) 公開方法：同時設定 node 位置與 this.spawnPos
+- `scripts/world/LevelLoader.ts`（修改）
+  import Player；spawnObjects switch 新增 'player' case：
+  找到 Canvas/World/Player 節點，呼叫 playerComp.setSpawnPos(pos)
+  若地圖沒放 player 物件，保留 editor 預設位置（不報錯）
+- `resources/tilemaps/level2.tmx`（新增）
+  Level 2 地圖（由使用者在 Tiled 設計）
+
+修改說明：
+  scene reload 時 LevelLoader 重新跑 spawnObjects，player 物件被偵測到後
+  立即移動 Player 節點並更新 spawnPos，確保每次重生都回到 Tiled 設定的位置。
+  若 Tiled 沒有放 player 物件則 fallback 到 editor 初始位置。
