@@ -1,4 +1,5 @@
 import GameManager from '../managers/GameManager';
+import Player from '../player/Player';
 
 const { ccclass, property } = cc._decorator;
 
@@ -99,6 +100,15 @@ export default class LevelLoader extends cc.Component {
                     case 'flagpole':
                         this.spawnPrefab(this.flagpolePrefab, pos, world, 'flagpolePrefab');
                         break;
+
+                    case 'player': {
+                        const playerNode = cc.find('Canvas/World/Player');
+                        if (playerNode) {
+                            const playerComp = playerNode.getComponent(Player);
+                            if (playerComp) playerComp.setSpawnPos(pos);
+                        }
+                        break;
+                    }
 
                     default:
                         cc.warn(`[LevelLoader] unknown object name: "${type}"`);

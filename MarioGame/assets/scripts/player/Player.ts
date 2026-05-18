@@ -217,6 +217,11 @@ export default class Player extends cc.Component {
         // GameOverUI handles scene reload or game over screen
     }
 
+    setSpawnPos(worldPos: cc.Vec2) {
+        this.node.setPosition(worldPos.x, worldPos.y);
+        this.spawnPos = cc.v2(worldPos.x, worldPos.y);
+    }
+
     growBig() {
         if (this.playerState !== PlayerState.SMALL) return;
         if (this.isTransforming) return;

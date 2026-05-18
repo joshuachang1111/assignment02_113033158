@@ -401,3 +401,22 @@ Claude 產出：
   - 踩頭 isStomp 邏輯：物理落地後 vy 會被瞬間設為 0，原本 playerVy < -1 因此漏判；
     完全移除 vy check 後，向上跳撞到龜身上半部 pPos.y > stompLine 被誤判為踩頭；
     最終方案 playerVy <= 100：跳躍中速度遠高於 100，落地後速度接近 0，兩者能正確區分。
+
+---
+
+--- 互動 17 ---
+使用者 prompt：Mario 出生點改由 Tiled Objects 層的 player 物件決定
+Claude 產出：
+- `scripts/player/Player.ts`（修改）
+  新增 setSpawnPos(worldPos) 公開方法：同時設定 node 位置與 this.spawnPos
+- `scripts/world/LevelLoader.ts`（修改）
+  import Player；spawnObjects switch 新增 'player' case：
+  找到 Canvas/World/Player 節點，呼叫 playerComp.setSpawnPos(pos)
+  若地圖沒放 player 物件，保留 editor 預設位置（不報錯）
+- `resources/tilemaps/level2.tmx`（新增）
+  Level 2 地圖（由使用者在 Tiled 設計）
+
+修改說明：
+  scene reload 時 LevelLoader 重新跑 spawnObjects，player 物件被偵測到後
+  立即移動 Player 節點並更新 spawnPos，確保每次重生都回到 Tiled 設定的位置。
+  若 Tiled 沒有放 player 物件則 fallback 到 editor 初始位置。
