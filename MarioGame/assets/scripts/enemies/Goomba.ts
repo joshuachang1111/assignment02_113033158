@@ -74,9 +74,10 @@ export default class Goomba extends EnemyBase {
         const myPos    = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
         const myCenter = cc.v2(myPos.x, myPos.y + 33);
 
-        // Player bottom-center in world space (center is 24 up for small)
-        const pPos    = this.player.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
-        const pCenter = cc.v2(pPos.x, pPos.y + 24);
+        // Player bottom-center in world space
+        const pPos        = this.player.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+        const playerHalfH = this.player.playerState === PlayerState.BIG ? 39 : 24;
+        const pCenter     = cc.v2(pPos.x, pPos.y + playerHalfH);
 
         const dx = Math.abs(myCenter.x - pCenter.x);
         const dy = Math.abs(myCenter.y - pCenter.y);

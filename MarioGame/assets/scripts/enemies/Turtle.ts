@@ -180,8 +180,10 @@ export default class Turtle extends EnemyBase {
         if (!this.player || this.hitCooldown > 0) return;
         if (this.player.playerState === PlayerState.DEAD) return;
 
-        const myPos    = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
-        const myCenter = cc.v2(myPos.x, myPos.y + 36);
+        const myPos   = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+        // WALKING: center = 36 (72/2), SHELL: center = 21 (SHELL_COL_OY * scale3 = 7*3)
+        const myHalfH = this.turtleState === TurtleState.WALKING ? 36 : 21;
+        const myCenter = cc.v2(myPos.x, myPos.y + myHalfH);
 
         const pPos        = this.player.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
         const playerHalfH = this.player.playerState === PlayerState.BIG ? 39 : 24;
@@ -189,7 +191,7 @@ export default class Turtle extends EnemyBase {
 
         const dx = Math.abs(myCenter.x - pCenter.x);
         const dy = Math.abs(myCenter.y - pCenter.y);
-        if (dx > this.OVERLAP_X + 8 || dy > this.OVERLAP_Y + 8) return;
+        if (dx > this.OVERLAP_X + 8 || dy > myHalfH + playerHalfH + 8) return;
 
         const playerVy  = this.player.rigidbody.linearVelocity.y;
         const stompLine = myPos.y + (this.turtleState === TurtleState.SHELL_IDLE ? 20 : 36);
@@ -209,9 +211,10 @@ export default class Turtle extends EnemyBase {
                 if (isStomp) {
                     this.handleStomp(this.player);
                 } else {
-                    // Kick shell
+                    // Kick shell — set velocity immediately so it doesn't wait a frame
                     this.direction = pCenter.x < myCenter.x ? 1 : -1;
                     this.turtleState = TurtleState.SHELL_SLIDING;
+                    this.rb.linearVelocity = cc.v2(this.direction * this.SLIDE_SPEED, this.rb.linearVelocity.y);
                     AudioManager.playSFX(AudioManager.I?.sfxKick);
                     this.hitCooldown = 0.5;
                 }
