@@ -53,12 +53,12 @@ export default class LevelSelectUI extends cc.Component {
 
     onLevel1Clicked() {
         GameManager.currentLevel = 1;
-        cc.director.loadScene('Game');
+        cc.director.loadScene('GameStart');
     }
 
     onLevel2Clicked() {
         GameManager.currentLevel = 2;
-        cc.director.loadScene('Game');
+        cc.director.loadScene('GameStart');
     }
 
     onBackClicked() {

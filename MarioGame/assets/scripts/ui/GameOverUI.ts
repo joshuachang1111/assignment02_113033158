@@ -28,7 +28,7 @@ export default class GameOverUI extends cc.Component {
             this.scheduleOnce(() => {
                 GameManager.resetTimer();
                 // 保留分數：只有 Game Over（lives=0）才歸零，重生不重置
-                cc.director.loadScene('Game');
+                cc.director.loadScene('GameStart');
             }, 2.5);
         }
     }

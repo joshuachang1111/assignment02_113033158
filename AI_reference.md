@@ -576,3 +576,26 @@ Claude 產出：
   兩者數值不一致。
   解法：進入 LevelSelect 時從 Firebase 拿累計分數存到 baseScore，
   HUD 顯示 baseScore + score，讓遊戲中的分數與排行榜保持一致。
+
+--- 互動 25 ---
+使用者 prompt：每次開始遊戲前（選關 / 重生）顯示 GAME START 過場畫面
+Claude 產出：
+- `scripts/ui/GameStartUI.ts`（新增）
+  獨立場景腳本；start() 用 cc.tween 對 contentNode 做
+  淡入 0.4s → 停留 1.2s → 淡出 0.4s → loadScene('Game')，共 2 秒；
+  contentNode 未設定時有 fallback 直接跳轉
+- `scripts/ui/LevelSelectUI.ts`（修改）
+  onLevel1Clicked / onLevel2Clicked 改為 loadScene('GameStart')
+- `scripts/ui/GameOverUI.ts`（修改）
+  重生路徑（lives > 0）改為 loadScene('GameStart')
+- Editor 建場景（GameStart.fire）
+  Canvas 黑底；Content 節點掛 Horizontal Layout；
+  子節點：GameLabel（"GAME"，金黃色）、MarioIcon（mario_small_1）、StartLabel（"START"）；
+  Canvas 掛 GameStartUI，contentNode 拖入 Content
+
+修改說明：
+  選擇獨立場景而非 overlay，讓過場動畫與遊戲邏輯完全分離。
+  GameManager.currentLevel 在跳 GameStart 前已設定，GameStart 場景結束後
+  loadScene('Game') 時 LevelLoader 照常讀取正確關卡。
+  重生流程原本在 GameOverUI 內 scheduleOnce 2.5s 後直接跳 Game，
+  現在改跳 GameStart，讓每次開始都有一致的過場體驗。
