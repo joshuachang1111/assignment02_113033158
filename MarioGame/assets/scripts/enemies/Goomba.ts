@@ -88,9 +88,9 @@ export default class Goomba extends EnemyBase {
 
         const playerVy = this.player.rigidbody.linearVelocity.y;
 
-        // Stomp: falling AND player bottom above 75% of Goomba height (near the top)
-        // Using 75% (myPos.y + 50) prevents mid-air side contacts from being misclassified
-        const stompLine = myPos.y + 36;
+        // Stomp: player bottom above 75% of Goomba height (66 world * 0.75 ≈ 49)
+        // Prevents mid-body side contacts from being misclassified as stomps
+        const stompLine = myPos.y + 49;
         if (pPos.y > stompLine && playerVy <= 100) {
             this.onStomped();
         } else {

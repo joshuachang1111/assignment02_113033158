@@ -130,6 +130,7 @@ export default class EnemyBase extends cc.Component {
         const pm      = cc.director.getPhysicsManager();
         const results = pm.rayCast(start, end, cc.RayCastType.Any);
         return !results.some(r => {
+            if (!r.collider || !r.collider.node) return false;
             if (r.collider.node === this.node) return false;
             const rb = r.collider.node.getComponent(cc.RigidBody);
             return rb && rb.type === cc.RigidBodyType.Static;
