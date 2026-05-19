@@ -4,65 +4,100 @@
 **課程**：CS2410 軟體設計與實驗（Software Studio）  
 **引擎**：Cocos Creator 2.4.8  
 **語言**：TypeScript  
-**部署**：Firebase Hosting
+**部署**：Firebase Hosting  
+**遊戲網址**：https://web-mario-113033158.web.app
 
 ---
 
-## 遊戲說明
+## 如何開始遊戲
 
-Mario 風格的橫向捲軸遊戲，共兩關。
+### 1. 開啟遊戲
+前往 **https://web-mario-113033158.web.app**，即可在瀏覽器中遊玩。
 
-### 操作方式
+### 2. 註冊 / 登入帳號
+
+進入主畫面後有兩個按鈕：
+
+| 按鈕 | 說明 |
+|------|------|
+| **LOG IN** | 已有帳號，輸入 Email 與密碼登入 |
+| **SIGN UP** | 新用戶，輸入暱稱、Email 與密碼完成註冊 |
+
+登入成功後會自動跳轉到**關卡選擇畫面**，顯示你的帳號名稱與累積總分。
+
+
+### 3. 選擇關卡
+- 點擊 **STAGE 1** 或 **STAGE 2** 開始遊戲
+- 畫面會先顯示 **GAME START** 過場動畫，接著進入遊戲
+
+---
+
+## 操作方式
 
 | 按鍵 | 動作 |
 |------|------|
-| `←` / `→` | 左右移動 |
-| `Space` / `↑` | 跳躍 |
+| `←` / `A` | 向左移動 |
+| `→` / `D` | 向右移動 |
+| `Space` / `↑` / `W` | 跳躍 |
 
-### 遊戲規則
+---
 
-- 踩踏敵人頭部可消滅敵人並得分
-- 側面碰觸敵人會受傷（大 Mario → 小 Mario，小 Mario → 死亡）
-- 頂到問號磚可獲得道具（蘑菇讓 Mario 變大）
-- 掉出邊界會扣除一條命
-- 命數歸零即 Game Over
+## 遊戲規則
+
+- **踩踏敵人頭部**：消滅敵人並得分（Goomba +100 分）
+- **側面碰觸敵人**：受傷（大 Mario → 小 Mario；小 Mario → 死亡）
+- **頂問號磚**：彈出蘑菇，吃到蘑菇後 Mario 變大
+- **抵達終點旗桿**：過關，剩餘時間換算為獎勵分數，分數上傳至排行榜
+- **掉出地圖邊界**：扣一條命
+- **時間歸零**：Mario 死亡
+- **命數歸零**：Game Over，本局分數不計入排行榜
+
+---
+
+## 如何查看排行榜
+
+1. 登入帳號後進入**關卡選擇畫面**
+2. 點擊下方 **BOARD** 按鈕
+3. 排行榜顯示前 10 名玩家的累積總分（所有過關分數加總）
+4. 點擊右上角 **×** 關閉排行榜
 
 ---
 
 ## 已完成功能
 
-### 基本功能（Basic Rules）
+### 基本功能
 
-- [x] World Map：物理重力、背景與 Camera 跟隨玩家（含 lookahead 偏移）
-- [x] Level Design：Static 牆壁與地板（TiledMap Ground layer 自動生成碰撞體）
-- [x] Level Design：問號磚（Objects layer Tiled Point → CC prefab 自動生成）
-- [x] Player：鍵盤控制、受傷/死亡/重生、大小狀態切換
-- [x] Enemies：Goomba — 走路動畫、碰牆轉向、踩頭擊殺/被側碰傷害玩家
-- [x] Enemies：Turtle — 走路動畫、完整 Shell 機制（踩踏→殼靜止→踢→殼滑行→自動復活）、邊緣偵測
-- [x] Question Blocks：超級蘑菇（頂到磚塊彈出蘑菇、觸碰蘑菇 Mario 變大）
+- [Ｏ] World Map：物理重力、背景與 Camera 跟隨玩家
+- [Ｏ] Level Design：Static 牆壁與地板（TiledMap Ground layer 自動生成碰撞體）
+- [Ｏ] Level Design：問號磚（頂到磚塊彈出蘑菇、變成空磚）
+- [Ｏ] Player：鍵盤控制、受傷／死亡／重生、大小狀態切換（SMALL / BIG）
+- [Ｏ] Enemies：Goomba — 走路動畫、碰牆轉向、踩頭擊殺
+- [Ｏ] Enemies：Turtle — 走路動畫、Shell 機制（踩踏→殼靜止→踢→殼滑行→自動復活）
+- [Ｏ] Question Blocks：超級蘑菇道具系統
 
 ### 動畫與音效
 
-- [x] 玩家行走、跳躍、死亡動畫（PlayerAnim）
-- [x] 玩家變大/縮小閃爍動畫
-- [x] Goomba 行走動畫
-- [x] BGM：MainMenu/LevelSelect → bgm1，Level 1 → bgm2，Level 2 → bgm3
-- [x] 跳躍、死亡、踩敵人音效
-- [x] 吃蘑菇（PowerUp）、縮小（PowerDown）、蘑菇出現、GameOver 音效
+- [Ｏ] 玩家行走、跳躍、死亡動畫
+- [Ｏ] 玩家變大 / 縮小閃爍動畫
+- [Ｏ] Goomba 行走動畫、Turtle 行走 / 殼動畫
+- [Ｏ] BGM：主選單 bgm1、Level 1 bgm2、Level 2 bgm3
+- [Ｏ] 跳躍、踩敵人、吃蘑菇、縮小、死亡、過關、Game Over 等音效
 
 ### UI
 
-- [x] 主選單（MainMenu）：START GAME 按鈕，進入 LevelSelect
-- [x] 關卡選擇（LevelSelect）：顯示當前命數、累積金幣、最高分數，STAGE 1 / STAGE 2 按鈕
-- [x] HUD：命數、分數（前綴 SCORE:）、計時器（前綴 TIME:，倒數至 0 玩家死亡）
-- [x] Game Over 畫面：每次死亡顯示，命歸零時出現 Return 按鈕回主選單
-- [x] 過關畫面（LevelClear）：旗竿觸碰觸發，播放過關音效、計算時間獎分，4 秒後回 LevelSelect
+- [Ｏ] 主選單（MainMenu）：LOGIN / SIGNUP 按鈕、訪客模式
+- [Ｏ] 過場動畫：GAME START（每次開始）、GAME OVER / YOU DIED（死亡）
+- [Ｏ] 關卡選擇（LevelSelect）：顯示帳號、累積總分、LEADERBOARD 按鈕、LOGOUT 按鈕
+- [Ｏ] HUD：命數、本局分數（SCORE）、倒數計時器（TIME）
+- [Ｏ] 過關畫面（LevelClear）：旗桿觸碰觸發，時間獎分，分數上傳 Firebase
+- [Ｏ] Game Over 畫面：命歸零顯示 RETURN 按鈕回 LevelSelect
 
 ### Firebase 功能（Bonus）
 
-- [ ] 會員機制：Email/Password 註冊與登入
-- [ ] 儲存/讀取遊戲進度（最佳分數、關卡解鎖狀態）
-- [ ] 全站排行榜（依分數排序，同分依完成時間排序）
+- [Ｏ] Firebase Hosting 部署（https://web-mario-113033158.web.app）
+- [Ｏ] 會員機制：Email / Password 註冊與登入（Firebase Authentication）
+- [Ｏ] 分數儲存：每次過關以 `FieldValue.increment` 原子累加至 Firestore
+- [Ｏ] 全站排行榜：前 10 名，依累積總分降序排列（LeaderboardUI）
 
 ---
 
@@ -70,30 +105,31 @@ Mario 風格的橫向捲軸遊戲，共兩關。
 
 | 關卡 | 說明 |
 |------|------|
-| Level 1 | — |
-| Level 2 | — |
+| Level 1 | 入門關卡，平坦地形為主，有 Goomba 敵人與問號磚 |
+| Level 2 | 進階關卡，多層平台與高低差，有 Goomba、Turtle 敵人 |
 
 ---
 
 ## 專案結構
 
 ```
-assets/
-├── scenes/         # MainMenu、LevelSelect、Game
-├── scripts/        # 所有 TypeScript 腳本
-│   ├── managers/   # GameManager、SceneManager、AudioManager、FirebaseManager
+MarioGame/assets/
+├── scenes/         # MainMenu、LevelSelect、Game、GameStart、GameOver
+├── scripts/
+│   ├── managers/   # GameManager、AudioManager、FirebaseManager
 │   ├── player/     # Player、PlayerState、PlayerAnim
 │   ├── enemies/    # EnemyBase、Goomba、Turtle
 │   ├── items/      # QuestionBlock、Mushroom、Coin
 │   ├── world/      # LevelLoader、CameraFollow、DeathZone
-│   └── ui/         # HUD、各場景 UI
-├── prefabs/        # 所有預製體
-├── tilemaps/       # level1.tmx、level2.tmx
-└── resources/      # 素材（sprites、audio、fonts）
+│   └── ui/         # HUD、MainMenuUI、LevelSelectUI、GameOverUI、
+│                   # GameOverSceneUI、GameStartUI、LevelClearUI、LeaderboardUI
+├── prefabs/        # Player、Goomba、Turtle、Mushroom、Coin、QuestionBlock
+├── resources/      # tilemaps（level1.tmＯ、level2.tmx）
+└── textures/       # 素材（sprites、audio、fonts、ui）
 ```
 
 ---
 
 ## 使用素材來源
 
-- 遊戲素材：課堂提供的 AS2_source（Mario sprite sheets、音效等）
+- 遊戲素材：課堂提供的 AS2_source（Mario sprite sheets、音效、字型、UI 圖片）
