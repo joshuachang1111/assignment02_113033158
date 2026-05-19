@@ -40,7 +40,6 @@ export default class LevelSelectUI extends cc.Component {
         // 從 Firebase 拉累計總分，存入 GameManager.baseScore 供遊戲中 HUD 使用
         const fbTotal = await FirebaseManager.getTotalScore();
         GameManager.baseScore = fbTotal;
-        GameManager.score = 0;   // 進 LevelSelect 時重設本局分數，避免累加
         if (this.scoreLabel)     this.scoreLabel.string     = String(fbTotal).padStart(7, '0');
         if (this.bestScoreLabel) this.bestScoreLabel.string = 'BEST: ' + String(fbTotal).padStart(7, '0');
     }

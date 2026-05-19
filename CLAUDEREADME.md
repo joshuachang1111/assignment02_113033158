@@ -253,11 +253,12 @@ DEAD + lives == 0 ──→ GameOver
 | 排行榜 UI（LeaderboardUI）| ✅ 完成 |
 | Logout 按鈕（LevelSelect）| ✅ 完成 |
 
-**分數設計（簡化版）：**
-- `totalScore`：所有過關分數的**累加總分**，每次過關用 `FieldValue.increment()` 原子累加
-- `leaderboard/{uid}.score` = `totalScore`（排行榜以累計總分排名）
-- `GameManager.baseScore`：進入 LevelSelect 時從 Firebase 拉取，存放歷史累計分數
-- HUD 的 SCORE 顯示 = `baseScore + score`（歷史 + 本局，與排行榜一致）
+**分數設計（最終版）：**
+- **遊戲內 HUD**：只顯示本局 `GameManager.score`，每次進 GameStart 畫面時歸零
+- **過關（LevelClear）**：`uploadScore(score)` → Firebase `FieldValue.increment()` 累加至 totalScore
+- **Game Over**：不上傳，本局得分丟棄
+- **LevelSelect 顯示**：從 Firebase 拉取 `totalScore`（所有過關累計），存入 `GameManager.baseScore` 供 UI 顯示
+- `leaderboard/{uid}.score` = `totalScore`（排行榜排名依據）
 - `bestScore` 欄位**不再維護**（已移除）
 
 **注意事項：**

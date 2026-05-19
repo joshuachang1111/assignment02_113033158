@@ -15,8 +15,9 @@ export default class GameStartUI extends cc.Component {
     private readonly FADE_OUT = 0.4;
 
     start() {
-        // 確保音樂靜默（GameStart 畫面無音效）
-        // BGM 會在 HUD.start() 中才播放
+        // 每次進 GameStart 都從 0 開始計分（單場得分）
+        GameManager.score = 0;
+        GameManager.levelCleared = false;
 
         if (!this.contentNode) {
             cc.warn('[GameStartUI] contentNode 未設定，直接跳轉');

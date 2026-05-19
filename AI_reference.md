@@ -599,3 +599,22 @@ Claude 產出：
   loadScene('Game') 時 LevelLoader 照常讀取正確關卡。
   重生流程原本在 GameOverUI 內 scheduleOnce 2.5s 後直接跳 Game，
   現在改跳 GameStart，讓每次開始都有一致的過場體驗。
+
+--- 互動 26 ---
+使用者 prompt：遊戲內 SCORE 只記單場得分，過關才加入 Firebase totalScore，Game Over 不加
+Claude 產出：
+- `scripts/ui/HUD.ts`（修改）
+  scoreLabel 改回只顯示 GameManager.score（移除 baseScore 加總）
+- `scripts/ui/GameStartUI.ts`（修改）
+  start() 加入 GameManager.score = 0 與 levelCleared = false，
+  確保每次進 GameStart 都從 0 開始計分
+- `scripts/ui/LevelSelectUI.ts`（修改）
+  移除進 LevelSelect 時的 GameManager.score = 0（由 GameStart 統一處理）
+
+修改說明：
+  原本 HUD 顯示 baseScore + score，導致進遊戲就看到歷史累計分數。
+  改為：HUD 顯示本局 score（從 0 開始），LevelSelect 顯示 Firebase totalScore。
+  score 歸零點移至 GameStartUI.start()，覆蓋所有進入 Game 的路徑
+  （選關 / 重生都必須經過 GameStart）。
+  LevelClearUI 已有 uploadScore(score) → Firebase FieldValue.increment，
+  Game Over 路徑不呼叫 uploadScore，符合「只加過關得分」需求。
