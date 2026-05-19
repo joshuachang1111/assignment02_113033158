@@ -9,6 +9,10 @@ export default class GameManager {
     static highScore:    number = 0;
     static coins:        number = 0;
 
+    // Firebase 累計總分（每次進 LevelSelect 時從 Firebase 拉取）
+    // displayScore = baseScore + score（本局得分）
+    static baseScore:    number = 0;
+
     // Set to true by LevelClearUI to freeze the timer and prevent timer-based death
     static levelCleared: boolean = false;
 
@@ -33,8 +37,9 @@ export default class GameManager {
 
     static addScore(n: number) {
         GameManager.score += n;
-        if (GameManager.score > GameManager.highScore) {
-            GameManager.highScore = GameManager.score;
+        const total = GameManager.baseScore + GameManager.score;
+        if (total > GameManager.highScore) {
+            GameManager.highScore = total;
         }
     }
 

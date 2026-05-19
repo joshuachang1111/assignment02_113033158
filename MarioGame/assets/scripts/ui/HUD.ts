@@ -39,7 +39,8 @@ export default class HUD extends cc.Component {
         }
 
         if (this.scoreLabel) {
-            this.scoreLabel.string = 'SCORE: ' + String(Math.floor(GameManager.score)).padStart(6, '0');
+            const total = GameManager.baseScore + GameManager.score;
+            this.scoreLabel.string = 'SCORE: ' + String(Math.floor(total)).padStart(6, '0');
         }
         if (this.timerLabel) {
             this.timerLabel.string = 'TIME: ' + String(Math.floor(Math.max(0, GameManager.timer)));

@@ -33,6 +33,7 @@ export default class Mushroom extends cc.Component {
         const col = this.getComponent(cc.PhysicsBoxCollider);
         if (col) { col.friction = 0; col.apply(); }
         cc.director.getPhysicsManager().enabledContactListener = true;
+        this.node.group = 'mushroom';
     }
 
     start() {

@@ -34,6 +34,7 @@ export default class EnemyBase extends cc.Component {
         this.rb.linearDamping = 0;
         this.col = this.getComponent(cc.PhysicsBoxCollider);
         cc.director.getPhysicsManager().enabledContactListener = true;
+        this.node.group = 'enemy';
     }
 
     update(dt: number) {

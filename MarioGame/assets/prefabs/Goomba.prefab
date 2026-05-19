@@ -78,8 +78,8 @@
     "_skewX": 0,
     "_skewY": 0,
     "_is3DNode": false,
-    "_groupIndex": 0,
-    "groupIndex": 0,
+    "_groupIndex": 1,
+    "groupIndex": 1,
     "_id": ""
   },
   {
@@ -172,6 +172,8 @@
     },
     "_enabled": true,
     "moveSpeed": 80,
+    "mapLeftBoundary": -613,
+    "edgeSensorOffset": 28,
     "atlas": {
       "__uuid__": "703ffda4-9c23-453b-8f67-4cea35cde63d"
     },

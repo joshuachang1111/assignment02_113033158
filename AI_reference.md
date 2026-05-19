@@ -540,3 +540,39 @@ Claude 產出：
   - Email Enumeration Protection：新版 Firebase 專案預設開啟，
     會把 user-not-found / wrong-password 包裝成 internal-error。
     建議在 Firebase Console → Authentication → Settings 關閉此設定。
+
+--- 互動 23 ---
+使用者 prompt：Mushroom 不應該與 Goomba / Turtle 發生碰撞
+Claude 產出：
+- `scripts/enemies/EnemyBase.ts`（修改）
+  onLoad() 加入 this.node.group = 'enemy'，執行時強制覆蓋節點 group，
+  不依賴 Editor 手動設定（避免場景舊實例 group 仍為 Default）
+- `scripts/items/Mushroom.ts`（修改）
+  onLoad() 加入 this.node.group = 'mushroom'，同上
+- Editor 設定（Group Manager）
+  新增 enemy（Group 1）、mushroom（Group 2）；
+  Collide Map 中 enemy × mushroom 取消勾選 → 物理不碰撞
+
+修改說明：
+  CC2.4.x 中修改 Prefab 的 Group 後，場景已放置的節點實例不會自動更新，
+  導致實際執行時 group 仍為 Default，碰撞過濾無效。
+  解法：在 onLoad() 以程式碼直接設定 node.group，確保每次執行都套用正確 group，
+  搭配 Group Manager 的 Collide Map 讓 enemy × mushroom 不產生物理碰撞。
+
+--- 互動 24 ---
+使用者 prompt：SCORE 標籤應顯示累計總分（baseScore + 本局得分），與排行榜一致
+Claude 產出：
+- `scripts/managers/GameManager.ts`（修改）
+  新增 static baseScore: number = 0（從 Firebase 拉取的歷史累計分數）；
+  addScore() 中 highScore 比較改為 baseScore + score
+- `scripts/ui/LevelSelectUI.ts`（修改）
+  start() 取得 fbTotal 後存入 GameManager.baseScore；
+  同時重設 GameManager.score = 0（避免重複進關卡時分數意外累加）
+- `scripts/ui/HUD.ts`（修改）
+  scoreLabel 顯示改為 GameManager.baseScore + GameManager.score（總計）
+
+修改說明：
+  原本 SCORE 只顯示 GameManager.score（本局），排行榜顯示 Firebase totalScore（累計），
+  兩者數值不一致。
+  解法：進入 LevelSelect 時從 Firebase 拿累計分數存到 baseScore，
+  HUD 顯示 baseScore + score，讓遊戲中的分數與排行榜保持一致。

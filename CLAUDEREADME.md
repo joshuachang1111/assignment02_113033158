@@ -247,13 +247,14 @@ DEAD + lives == 0 ──→ GameOver
 | 過關上傳分數（uploadScore）| ✅ 完成 |
 | LevelSelect 顯示個人最佳分數（getBestScore）| ✅ 完成 |
 | Game Over 後跳 LevelSelect（維持登入）| ✅ 完成 |
-| 排行榜 UI（LeaderboardUI）| ❌ 待做 |
-| Logout 按鈕（LevelSelect）| ❌ 待做 |
+| 排行榜 UI（LeaderboardUI）| ✅ 完成 |
+| Logout 按鈕（LevelSelect）| ✅ 完成 |
 
 **分數設計（簡化版）：**
 - `totalScore`：所有過關分數的**累加總分**，每次過關用 `FieldValue.increment()` 原子累加
 - `leaderboard/{uid}.score` = `totalScore`（排行榜以累計總分排名）
-- LevelSelect 的 SCORE 顯示 = `totalScore`
+- `GameManager.baseScore`：進入 LevelSelect 時從 Firebase 拉取，存放歷史累計分數
+- HUD 的 SCORE 顯示 = `baseScore + score`（歷史 + 本局，與排行榜一致）
 - `bestScore` 欄位**不再維護**（已移除）
 
 **注意事項：**
@@ -270,6 +271,8 @@ DEAD + lives == 0 ──→ GameOver
 - **死亡重生 score 歸零**：移除 `GameOverUI` 重生時的 `score=0`，只有 Game Over 才清零
 - **EnemyBase rayCast null crash**：加入 `!r.collider || !r.collider.node` 防護
 - **HUD 計時器 Math.ceil**：改為 `Math.floor`，倒數更自然
+- **SCORE 顯示本局而非累計**：HUD 改為顯示 `baseScore + score`，baseScore 在 LevelSelect 時從 Firebase 拉取
+- **Mushroom 碰撞 group 未生效**：`EnemyBase.onLoad` 加 `this.node.group = 'enemy'`、`Mushroom.onLoad` 加 `this.node.group = 'mushroom'`，強制覆蓋 Editor 場景實例的舊值
 
 ---
 
