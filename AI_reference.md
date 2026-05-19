@@ -673,3 +673,17 @@ Claude 產出：
   原本流程：Game 場景載入 → 預設顯示 Level 1 地圖 → 0.1s 後換成 Level 2。
   閃爍原因：TiledMap 換 tmxAsset 需要一幀才能生效，期間顯示舊資產。
   解法：切換前隱藏整個 World 節點，確保玩家看到的第一幀就是完整的 Level 2。
+
+--- 互動 30 ---
+使用者 prompt：Firebase Hosting 部署
+Claude 產出：
+- `firebase.json`（新增）：Hosting public 目錄指向 web-desktop build 輸出
+- `.firebaserc`（新增）：關聯 Firebase 專案 web-mario-113033158
+- `.gitignore`（修改）：加入 .firebase/ 快取目錄
+
+操作步驟：
+  1. Cocos Creator Build → Web Desktop，Build Path 設為 /Users/tungchang/Desktop（避開中文路徑）
+  2. firebase init hosting（選現有專案 web-mario-113033158，public dir = /Users/tungchang/Desktop/web-desktop）
+  3. firebase deploy --only hosting
+
+部署網址：https://web-mario-113033158.web.app

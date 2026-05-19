@@ -232,7 +232,7 @@ DEAD + lives == 0 ──→ GameOver
 | 9 | Level 2 關卡設計 + Turtle 敵人 | ✅ 完成（Turtle、Level 2 地圖、spawn point by Tiled）|
 | 10 | Firebase 整合（登入、存檔、排行榜）| 🔄 進行中（Auth + Firestore 完成，排行榜 UI 待做）|
 | 10.5 | GameStart / GameOver 獨立過場場景 | ✅ 完成 |
-| 11 | Firebase Hosting 部署 | |
+| 11 | Firebase Hosting 部署 | ✅ 完成（https://web-mario-113033158.web.app）|
 | 12 | 測試、Bug 修正、Appearance 調整 | 🔄 進行中（字型、title 圖完成）|
 
 ---

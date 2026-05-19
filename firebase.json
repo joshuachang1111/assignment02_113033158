@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "/Users/tungchang/Desktop/web-desktop",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
