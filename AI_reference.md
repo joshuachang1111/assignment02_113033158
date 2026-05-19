@@ -447,6 +447,44 @@ Claude 產出：
 
 ---
 
+--- 互動 20 ---
+使用者 prompt：排行榜 UI 實作（LeaderboardUI），風格同登入面板
+Claude 產出：
+- `scripts/ui/LeaderboardUI.ts`（新增）
+  onLoad 隱藏面板；show() 呼叫 FirebaseManager.getLeaderboard() 填入 10 行資料；
+  Promise.race + 5s timeout 防止卡在「載入中...」；
+  每行子節點 RankLabel / NameLabel / ScoreLabel 以 getChildByName 取得
+- `scripts/ui/LevelSelectUI.ts`（修改）
+  新增 leaderboardPanel @property；onLeaderboardClicked() 呼叫 LeaderboardUI.show()；
+  新增 onLogoutClicked()：Firebase.signOut() + loadScene MainMenu
+- Editor 設定
+  LeaderboardPanel：button_orange SLICED 背景、title_0 標題區、10 個 Row 節點
+  每 Row：text_area_0/text_area_1 交替背景 + RankLabel/NameLabel/ScoreLabel
+
+修改說明：
+  LeaderboardUI 的 rows[] 陣列每項對應一個 Row 節點，
+  show() 時先全部 active=false，拿到資料後逐筆 active=true 並填文字。
+  timeout 使用 Promise.race([getLeaderboard(), new Promise(5s→[])])
+  防止 Firestore 首次讀取慢或規則錯誤時面板永遠卡住。
+  Firestore 規則：leaderboard allow read: if true（不需登入即可看排行榜）
+
+--- 互動 21 ---
+使用者 prompt：Score 統計改為所有局的累加總分（totalScore），排行榜也改用 totalScore
+Claude 產出：
+- `scripts/managers/FirebaseManager.ts`（修改）
+  uploadScore()：users/{uid}.totalScore 與 leaderboard/{uid}.score 都改用
+  FieldValue.increment(score) 累加，不再比較最高分；
+  新增 getTotalScore()：讀取 users/{uid}.totalScore
+  移除 getBestScore() 的使用（bestScore 欄位不再維護）
+- `scripts/ui/LevelSelectUI.ts`（修改）
+  start() 只拉 getTotalScore()，scoreLabel 與 bestScoreLabel 都顯示 totalScore
+
+修改說明：
+  原本 bestScore 只記最高單局，leaderboard 也只在破紀錄時更新。
+  改為 totalScore 後，每次過關都 +score，排行榜以累積總分排名，
+  資料結構更簡單（只有一個數值需要維護）。
+  FieldValue.increment() 是 Firestore 的原子操作，不需要先讀再寫，避免 race condition。
+
 --- 互動 19 ---
 使用者 prompt：Firebase 登入流程 bug 修正、UI 改善、Game Over 後維持登入狀態
 Claude 產出：

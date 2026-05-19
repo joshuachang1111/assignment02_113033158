@@ -86,36 +86,44 @@ export default class FirebaseManager {
 
     // ── Firestore ─────────────────────────────────────────────────────────────
 
-    /** 過關後上傳分數（只有登入且分數比舊的高才寫入）*/
+    /** 過關後上傳分數：users 與 leaderboard 的 totalScore 都累加 */
     static async uploadScore(score: number): Promise<void> {
         if (!this.currentUser || !this.isReady) return;
         try {
             const fb  = (window as any).firebase;
             const uid = this.currentUser.uid;
             const db  = fb.firestore();
+            const inc = fb.firestore.FieldValue.increment(score);
+            const ts  = fb.firestore.FieldValue.serverTimestamp();
 
-            // users/{uid} best score
-            const userRef  = db.collection('users').doc(uid);
-            const userSnap = await userRef.get();
-            const best     = userSnap.exists ? (userSnap.data().bestScore || 0) : 0;
-            if (score > best) {
-                await userRef.set({ bestScore: score }, { merge: true });
-            }
+            // users/{uid}：累加 totalScore
+            await db.collection('users').doc(uid).set(
+                { totalScore: inc },
+                { merge: true }
+            );
 
-            // leaderboard/{uid}
-            const lbRef  = db.collection('leaderboard').doc(uid);
-            const lbSnap = await lbRef.get();
-            const lbBest = lbSnap.exists ? (lbSnap.data().score || 0) : 0;
-            if (score > lbBest) {
-                await lbRef.set({
-                    name:      this.currentUser.displayName || this.currentUser.email,
-                    score,
-                    updatedAt: fb.firestore.FieldValue.serverTimestamp(),
-                });
-            }
-            cc.log('[Firebase] score uploaded:', score);
+            // leaderboard/{uid}：累加 score（同樣是 totalScore）
+            await db.collection('leaderboard').doc(uid).set({
+                name:      this.currentUser.displayName || this.currentUser.email,
+                score:     inc,
+                updatedAt: ts,
+            }, { merge: true });
+
+            cc.log('[Firebase] totalScore incremented by', score);
         } catch (e) {
             cc.error('[Firebase] uploadScore error:', e);
+        }
+    }
+
+    /** 取得累計總分 */
+    static async getTotalScore(): Promise<number> {
+        if (!this.currentUser || !this.isReady) return 0;
+        try {
+            const db  = (window as any).firebase.firestore();
+            const doc = await db.collection('users').doc(this.currentUser.uid).get();
+            return doc.exists ? (doc.data().totalScore || 0) : 0;
+        } catch (e) {
+            return 0;
         }
     }
 

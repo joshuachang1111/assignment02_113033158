@@ -250,6 +250,12 @@ DEAD + lives == 0 ──→ GameOver
 | 排行榜 UI（LeaderboardUI）| ❌ 待做 |
 | Logout 按鈕（LevelSelect）| ❌ 待做 |
 
+**分數設計（簡化版）：**
+- `totalScore`：所有過關分數的**累加總分**，每次過關用 `FieldValue.increment()` 原子累加
+- `leaderboard/{uid}.score` = `totalScore`（排行榜以累計總分排名）
+- LevelSelect 的 SCORE 顯示 = `totalScore`
+- `bestScore` 欄位**不再維護**（已移除）
+
 **注意事項：**
 - Firebase Console → Authentication → Settings → **關閉 Email Enumeration Protection**，否則錯誤訊息會是 internal-error
 - EmailInput / PasswordInput / NameInput 的 **Max Length** 需在 Editor 設為 100
