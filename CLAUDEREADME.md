@@ -233,7 +233,7 @@ DEAD + lives == 0 ──→ GameOver
 | 10 | Firebase 整合（登入、存檔、排行榜）| 🔄 進行中（Auth + Firestore 完成，排行榜 UI 待做）|
 | 10.5 | GameStart 過場畫面 | ✅ 完成 |
 | 11 | Firebase Hosting 部署 | |
-| 12 | 測試、Bug 修正、Appearance 調整 | |
+| 12 | 測試、Bug 修正、Appearance 調整 | 🔄 進行中（字型、title 圖完成）|
 
 ---
 
@@ -304,7 +304,12 @@ DEAD + lives == 0 ──→ GameOver
 - **CameraFollow.playerNode**：每次重建 Player prefab 後，Main Camera 的 playerNode 需重新拖入。
 - **AudioManager 節點必須是 Scene 的直接子節點**（跟 Canvas 同層），不能是 Canvas 子節點，否則 `addPersistRootNode` 無效，跨場景後節點消失。
 - **⚠️ 字型尚未套用**：目前所有場景（MainMenu、LevelSelect、Game 的 HUD/GameOverPanel）的 Label 節點**全部都沒有套用 yellow_font / white_font**，目前用系統字型代替。Button 裡的 Label 尤其麻煩——bitmap font 在 CC2.4.8 的 Button 子 Label 上會遇到 Size W 無法修改、文字只顯示一個字元等問題。之後需要統一處理字型套用。
-- **bitmap font 在 CC2.4.8 的已知限制**：Label 節點的 Size W 會被 bitmap font 鎖死，導致文字被截斷。解法是設 Overflow=NONE 並把 W 設足夠大，或改用系統字型加顏色代替。
+- **bitmap font 在 CC2.4.8 的已知限制**：
+  - `yellow_font`：只含 A-Z 大寫 + 數字 1-8，**無 0、9、小寫、空格**
+  - `white_font`：含 A-Z 大寫 + 數字 0-9，**無小寫、空格**
+  - 文字內容必須**全大寫**，Font Size 必須等於 BMFont Original Size（32），用節點 Scale 調整顯示大小
+  - 中文文字無法用 bitmap font，保持系統字型
+  - 分數/時間等數字用 white_font（有完整 0-9）
 - **Turtle Prefab 的 Atlas 欄位**：必須在 Inspector 的 Turtle 腳本元件中指定 SpriteAtlas（Turtle.plist），否則執行時沒有 sprite 圖片。
 - **Tiled 物件生成**：Tiled Objects layer 的物件必須用 **Name 欄位**（不是 Type）設定名稱（goomba、turtle、flagpole、question_block）。第一個 flagpole 若用 `addComponent` 方式動態掛載腳本，會拋出例外導致整個 loop 中斷——現已改用 Prefab 方式。
 - **EnemyBase 邊緣偵測**：使用 `cc.director.getPhysicsManager().rayCast()` 往前方地面投射射線，僅觸碰 Static RigidBody 才算地面，可有效避免把其他敵人誤判為地板。Turtle 進入 shell 狀態時會停用邊緣偵測（shell 可以滾出邊緣）。

@@ -618,3 +618,22 @@ Claude 產出：
   （選關 / 重生都必須經過 GameStart）。
   LevelClearUI 已有 uploadScore(score) → Firebase FieldValue.increment，
   Game Over 路徑不呼叫 uploadScore，符合「只加過關得分」需求。
+
+--- 互動 27 ---
+使用者 prompt：外觀改善：MainMenu 加 title_0.png、套用 bitmap font
+Claude 產出：
+- `scenes/MainMenu.fire`（修改）
+  Canvas 下新增 TitleImage 節點（Sprite，title_0.png，位於按鈕上方）；
+  英文 Label 套用 white_font / yellow_font bitmap font，中文 Label 保持系統字型
+- `scenes/LevelSelect.fire`（修改）
+  英文 Label 套用 bitmap font
+
+修改說明：
+  CC2.4.8 bitmap font 限制整理：
+  1. yellow_font：僅含 A-Z 大寫 + 數字 1-8（無 0、9、小寫、空格）
+  2. white_font：含 A-Z 大寫 + 數字 0-9（無小寫、空格）
+  3. 文字內容必須全大寫才能正確顯示
+  4. Font Size 必須等於 BMFont Original Size（32），用節點 Scale 調整大小
+  5. Overflow = NONE（auto-size），W 會自動計算不需手動設定
+  中文文字（未登入、訪客模式等）無法用 bitmap font，保持系統字型。
+  分數、時間等數字顯示改用 white_font（有完整 0-9）。
