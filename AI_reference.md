@@ -447,6 +447,31 @@ Claude 產出：
 
 ---
 
+--- 互動 22 ---
+使用者 prompt：全面 bug 審查，修正 Goomba 踩頭、score 保留、rayCast、計時器，
+               並修正踩頭偵測在高處誤觸發問題
+Claude 產出：
+- `scripts/enemies/Goomba.ts`（修改）
+  stompLine 從 myPos.y+36（55%）改為 myPos.y+49（75% of 66）；
+  checkPlayerOverlap 重構：踩頭改用 pPos.y（玩家底部）對 Goomba 幾何判斷，
+  不再依賴 dy（center-to-center）——原本 BIG mario 在 Goomba 頂端 dy=72>65 永遠漏判；
+  踩頭視窗：pPos.y in [stompLine, goombaTop+12]，12px 為一幀緩衝；
+  傷害路徑分離：damage 只在 dy 通過且 pPos.y <= stompLine 時觸發
+- `scripts/ui/GameOverUI.ts`（修改）
+  移除重生時 GameManager.score=0，分數只在 startNewGame（lives=0 Game Over）時歸零
+- `scripts/enemies/EnemyBase.ts`（修改）
+  isAtEdge rayCast callback 加 null check：!r.collider || !r.collider.node
+- `scripts/ui/HUD.ts`（修改）
+  計時器 Math.ceil → Math.floor，倒數更自然
+
+修改說明：
+  - Goomba dy bug：dy = |goombaCenter.y - playerCenter.y|。BIG mario 站在 Goomba 頂端
+    dy = |(33)-(66+39)| = 72 > 65，導致踩頭路徑完全跳過。
+    改用 pPos.y（玩家底端）直接對比 stompLine/goombaTop，不受 playerHalfH 影響。
+  - 上限 goombaTop+12：防止玩家在 Goomba 頭頂 80px 外就誤觸發踩頭（原版 +80 太鬆），
+    12px 約等於正常落速（vy≈300）一幀的位移，夠緊又不漏判。
+  - score 保留：原本每次死亡重生都清零，修改後只有真正 Game Over 才由 startNewGame 歸零。
+
 --- 互動 20 ---
 使用者 prompt：排行榜 UI 實作（LeaderboardUI），風格同登入面板
 Claude 產出：

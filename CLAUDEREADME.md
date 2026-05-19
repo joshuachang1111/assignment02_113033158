@@ -262,6 +262,17 @@ DEAD + lives == 0 ──→ GameOver
 
 ---
 
+## 已修正的 Bug（Stage 10 後期）
+
+- **Goomba stompLine 太低**：`myPos.y+36`（55%）→ `myPos.y+49`（75%），降低側碰誤判
+- **Goomba dy 踩頭永遠漏判**：BIG mario 在 Goomba 頂端 dy=72>65 → 改用 `pPos.y` 對 Goomba 幾何判斷
+- **Goomba 踩頭視窗太寬**：上限從 `goombaTop+80` 縮至 `goombaTop+12`，防止空中誤觸發
+- **死亡重生 score 歸零**：移除 `GameOverUI` 重生時的 `score=0`，只有 Game Over 才清零
+- **EnemyBase rayCast null crash**：加入 `!r.collider || !r.collider.node` 防護
+- **HUD 計時器 Math.ceil**：改為 `Math.floor`，倒數更自然
+
+---
+
 ## 已修正的 Bug（Stage 9 後期）
 
 - **Player.ts die() crash**：`this.groundContacts = 0` 為未宣告變數，已刪除
