@@ -89,10 +89,10 @@ export default class Goomba extends EnemyBase {
         const stompLine = myPos.y + 49;   // 75% of Goomba height
 
         // ── Stomp: use player BOTTOM (pPos.y) vs Goomba geometry ─────────────
-        // Avoids the dy (center-to-center) check which breaks for BIG mario or
-        // fast falls where pCenter is too far above goombaCenter to pass dy test.
-        // Allow up to 80px above goombaTop to catch high-speed falls.
-        if (pPos.y >= stompLine && pPos.y <= goombaTop + 80 && playerVy <= 100) {
+        // pPos.y must be within [stompLine, goombaTop + 12] — player bottom
+        // must be near or at the actual Goomba hitbox top (12px tolerance for
+        // one physics step at normal fall speed).
+        if (pPos.y >= stompLine && pPos.y <= goombaTop + 12 && playerVy <= 100) {
             this.onStomped();
             return;
         }
