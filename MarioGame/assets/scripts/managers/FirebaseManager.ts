@@ -115,13 +115,20 @@ export default class FirebaseManager {
         }
     }
 
-    /** 取得累計總分 */
+    /** 取得累計總分（先讀 users.totalScore，沒有則 fallback 到 leaderboard.score）*/
     static async getTotalScore(): Promise<number> {
         if (!this.currentUser || !this.isReady) return 0;
         try {
             const db  = (window as any).firebase.firestore();
-            const doc = await db.collection('users').doc(this.currentUser.uid).get();
-            return doc.exists ? (doc.data().totalScore || 0) : 0;
+            const uid = this.currentUser.uid;
+
+            const userDoc = await db.collection('users').doc(uid).get();
+            const total   = userDoc.exists ? (userDoc.data().totalScore || 0) : 0;
+            if (total > 0) return total;
+
+            // 舊資料 fallback：從 leaderboard 讀
+            const lbDoc = await db.collection('leaderboard').doc(uid).get();
+            return lbDoc.exists ? (lbDoc.data().score || 0) : 0;
         } catch (e) {
             return 0;
         }
