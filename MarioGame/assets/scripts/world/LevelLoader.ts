@@ -28,9 +28,15 @@ export default class LevelLoader extends cc.Component {
 
         // Switch to level 2 map asset if needed
         if (GameManager.currentLevel === 2 && this.level2Asset) {
+            // 隱藏整個 World 節點（含 Map、Player、敵人）
+            // 等 TMX 換好、碰撞體生成、Player 位置設定完畢後再顯示
+            const world = this.node.parent;
+            if (world) world.opacity = 0;
             this.getComponent(cc.TiledMap).tmxAsset = this.level2Asset;
-            // Wait one frame for TiledMap to reload before reading layers
-            this.scheduleOnce(() => this.generateGroundColliders(), 0.1);
+            this.scheduleOnce(() => {
+                this.generateGroundColliders();
+                if (world) world.opacity = 255;
+            }, 0.1);
         } else {
             this.generateGroundColliders();
         }

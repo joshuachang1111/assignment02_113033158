@@ -660,3 +660,16 @@ Claude 產出：
   死亡 → GameOver 場景（判斷 lives）→ GameStart / LevelSelect。
   bitmap font 在 CC2.4.8 的 Layout 元件中無法正確計算寬度（Label W=0），
   導致節點全部疊在一起，解法是移除 Layout 改用手動 Position X 定位。
+
+--- 互動 29 ---
+使用者 prompt：進入 Level 2 時會卡一幀，先看到 Level 1 畫面再切換
+Claude 產出：
+- `scripts/world/LevelLoader.ts`（修改）
+  Level 2 載入時先把整個 World 節點（含 Map、Player、敵人）opacity 設為 0；
+  等 TMX 換好、scheduleOnce 0.1s 後 generateGroundColliders 執行完畢
+  （碰撞體生成 + Player spawn 位置設定）再把 World opacity 恢復 255
+
+修改說明：
+  原本流程：Game 場景載入 → 預設顯示 Level 1 地圖 → 0.1s 後換成 Level 2。
+  閃爍原因：TiledMap 換 tmxAsset 需要一幀才能生效，期間顯示舊資產。
+  解法：切換前隱藏整個 World 節點，確保玩家看到的第一幀就是完整的 Level 2。
