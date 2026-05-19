@@ -70,33 +70,40 @@ export default class Goomba extends EnemyBase {
         if (!this.player || this.hitCooldown > 0) return;
         if (this.player.playerState === PlayerState.DEAD) return;
 
-        // Goomba center in world space (anchor bottom-center → center is 33 up)
-        const myPos    = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
-        const myCenter = cc.v2(myPos.x, myPos.y + 33);
+        // Goomba geometry (anchor bottom-center, world space)
+        // 18×22 px × scale3 = 54×66 world
+        const myPos     = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+        const myCenter  = cc.v2(myPos.x, myPos.y + 33);
+        const goombaTop = myPos.y + 66;
 
-        // Player bottom-center in world space
+        // Player geometry
         const pPos        = this.player.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
         const playerHalfH = this.player.playerState === PlayerState.BIG ? 39 : 24;
         const pCenter     = cc.v2(pPos.x, pPos.y + playerHalfH);
 
+        // X range check first (early exit)
         const dx = Math.abs(myCenter.x - pCenter.x);
-        const dy = Math.abs(myCenter.y - pCenter.y);
+        if (dx > this.OVERLAP_X + 8) return;
 
-        // +8 buffer: Box2D resolves bodies to exact contact (dx == OVERLAP_X),
-        // which the strict >= check would miss. Buffer ensures contact always fires.
-        if (dx > this.OVERLAP_X + 8 || dy > this.OVERLAP_Y + 8) return;
+        const playerVy  = this.player.rigidbody.linearVelocity.y;
+        const stompLine = myPos.y + 49;   // 75% of Goomba height
 
-        const playerVy = this.player.rigidbody.linearVelocity.y;
-
-        // Stomp: player bottom above 75% of Goomba height (66 world * 0.75 ≈ 49)
-        // Prevents mid-body side contacts from being misclassified as stomps
-        const stompLine = myPos.y + 49;
-        if (pPos.y > stompLine && playerVy <= 100) {
+        // ── Stomp: use player BOTTOM (pPos.y) vs Goomba geometry ─────────────
+        // Avoids the dy (center-to-center) check which breaks for BIG mario or
+        // fast falls where pCenter is too far above goombaCenter to pass dy test.
+        // Allow up to 80px above goombaTop to catch high-speed falls.
+        if (pPos.y >= stompLine && pPos.y <= goombaTop + 80 && playerVy <= 100) {
             this.onStomped();
-        } else {
-            this.player.takeDamage();
-            this.hitCooldown = 0.5;
+            return;
         }
+
+        // ── Damage: standard AABB, player not above stomp line ───────────────
+        const dy = Math.abs(myCenter.y - pCenter.y);
+        if (dy > this.OVERLAP_Y + 8) return;
+        if (pPos.y > stompLine) return;   // above stomp line but not in stomp window
+
+        this.player.takeDamage();
+        this.hitCooldown = 0.5;
     }
 
     private onStomped() {
