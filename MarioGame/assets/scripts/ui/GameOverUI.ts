@@ -1,40 +1,20 @@
 import GameManager from '../managers/GameManager';
 import AudioManager from '../managers/AudioManager';
 
-const { ccclass, property } = cc._decorator;
+const { ccclass } = cc._decorator;
 
 @ccclass
 export default class GameOverUI extends cc.Component {
 
-    @property(cc.Node)
-    returnButton: cc.Node = null;
-
     onLoad() {
         this.node.active = false;
-        GameManager.onLoseLife = (lives) => this.handleLoseLife(lives);
+        GameManager.onLoseLife = (_lives) => {
+            AudioManager.stopBGM();
+            cc.director.loadScene('GameOver');
+        };
     }
 
     onDestroy() {
         GameManager.onLoseLife = null;
-    }
-
-    private handleLoseLife(lives: number) {
-        this.node.active = true;
-        if (lives <= 0) {
-            AudioManager.playSFX(AudioManager.I?.sfxGameOver);
-            if (this.returnButton) this.returnButton.active = true;
-        } else {
-            if (this.returnButton) this.returnButton.active = false;
-            this.scheduleOnce(() => {
-                GameManager.resetTimer();
-                // 保留分數：只有 Game Over（lives=0）才歸零，重生不重置
-                cc.director.loadScene('GameStart');
-            }, 2.5);
-        }
-    }
-
-    onReturnClicked() {
-        GameManager.startNewGame();
-        cc.director.loadScene('LevelSelect');
     }
 }

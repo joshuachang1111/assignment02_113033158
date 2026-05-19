@@ -231,7 +231,7 @@ DEAD + lives == 0 ──→ GameOver
 | 8 | 動畫（Sprite Animation）+ 音效 | ✅ 完成（音效；動畫已在 Stage 3~5 完成）|
 | 9 | Level 2 關卡設計 + Turtle 敵人 | ✅ 完成（Turtle、Level 2 地圖、spawn point by Tiled）|
 | 10 | Firebase 整合（登入、存檔、排行榜）| 🔄 進行中（Auth + Firestore 完成，排行榜 UI 待做）|
-| 10.5 | GameStart 過場畫面 | ✅ 完成 |
+| 10.5 | GameStart / GameOver 獨立過場場景 | ✅ 完成 |
 | 11 | Firebase Hosting 部署 | |
 | 12 | 測試、Bug 修正、Appearance 調整 | 🔄 進行中（字型、title 圖完成）|
 

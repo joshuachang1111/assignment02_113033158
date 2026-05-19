@@ -637,3 +637,26 @@ Claude 產出：
   5. Overflow = NONE（auto-size），W 會自動計算不需手動設定
   中文文字（未登入、訪客模式等）無法用 bitmap font，保持系統字型。
   分數、時間等數字顯示改用 white_font（有完整 0-9）。
+
+--- 互動 28 ---
+使用者 prompt：Game Over 頁面做成像 GameStart 的獨立場景
+Claude 產出：
+- `scripts/ui/GameOverSceneUI.ts`（新增）
+  lives <= 0 → 顯示 "GAME OVER"，淡入後等玩家按按鈕，播 sfxGameOver；
+  lives > 0 → 顯示 "YOU DIED"，淡入 0.25s → 停留 0.5s → 淡出 0.25s → GameStart；
+  label1/label2 文字由腳本動態設定，兩種狀況共用同一場景；
+  contentNode 未設定時有 fallback 防止 crash
+- `scripts/ui/GameOverUI.ts`（修改）
+  簡化為只觸發：stopBGM + loadScene('GameOver')；
+  移除原本的 overlay 邏輯、returnButton、scheduleOnce
+- `scripts/ui/GameStartUI.ts`（修改）
+  start() 加入 GameManager.resetTimer()，統一在 GameStart 重置計時器
+- `scenes/GameOver.fire`（新增）
+  黑底 Canvas；Content 節點含 Label1 + MarioIcon(mario_small_6) + Label2；
+  ReturnButton 在 GAME OVER 時顯示；掛 GameOverSceneUI
+
+修改說明：
+  原本 GameOverUI 是 Game 場景內的 overlay，改為獨立場景後流程更清晰：
+  死亡 → GameOver 場景（判斷 lives）→ GameStart / LevelSelect。
+  bitmap font 在 CC2.4.8 的 Layout 元件中無法正確計算寬度（Label W=0），
+  導致節點全部疊在一起，解法是移除 Layout 改用手動 Position X 定位。

@@ -15,9 +15,10 @@ export default class GameStartUI extends cc.Component {
     private readonly FADE_OUT = 0.4;
 
     start() {
-        // 每次進 GameStart 都從 0 開始計分（單場得分）
+        // 每次進 GameStart 都從 0 開始計分，並重置計時器
         GameManager.score = 0;
         GameManager.levelCleared = false;
+        GameManager.resetTimer();
 
         if (!this.contentNode) {
             cc.warn('[GameStartUI] contentNode 未設定，直接跳轉');
